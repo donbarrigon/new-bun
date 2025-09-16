@@ -1,6 +1,6 @@
-### starter-kit-bun
+# starter-kit-bun
 
-### 📋 Comandos de instalación
+## 📋 Comandos de instalación
 
 Instalar degit globalmente si no lo has hecho
 
@@ -28,7 +28,7 @@ cp .env.example .env
 
 ---
 
-### 🔄 **Comandos de desarrollo**
+## 🔄 **Comandos de desarrollo**
 
 Correr el modo desarrollador
 
@@ -48,8 +48,12 @@ correr el proyecto
 bun main.ts
 ```
 
-</details>
+---
+
+## Licencia
 
 Creado con ❤️ por Don Barrigon
+
+Este proyecto está bajo la [MIT License](./LICENSE).
 
 This project was created using `bun init` in bun v1.2.21. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.
