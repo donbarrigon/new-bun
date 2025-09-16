@@ -2,31 +2,31 @@
 
 <details>
 <summary>📋 Comandos de instalación</summary>
-Instalar degit globalmente
+Instalar degit globalmente si no lo has hecho
 
 ```bash
 bun add -g degit
 ```
 
-Crear proyecto desde tu template
+1. Crear proyecto desde tu template
 
 ```bash
 degit donbarrigon/starter-kit-bun nombre-de-tu-proyecto
 ```
 
-Instalar dependencias
+2. Instalar dependencias
 
 ```bash
 bun install
 ```
 
-</details>
-
-Configuracion del entorno
+3. Configuracion del entorno
 
 ```bash
 cp .env.example .env
 ```
+
+</details>
 
 <details> 
 <summary>🔄 **Comandos de desarrollo**</summary>
