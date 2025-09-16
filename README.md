@@ -1,7 +1,7 @@
-# starter-kit-bun
+### starter-kit-bun
 
-<details>
-<summary>📋 Comandos de instalación</summary>
+### 📋 Comandos de instalación
+
 Instalar degit globalmente si no lo has hecho
 
 ```bash
@@ -26,10 +26,10 @@ bun install
 cp .env.example .env
 ```
 
-</details>
+---
 
-<details> 
-<summary>🔄 **Comandos de desarrollo**</summary>
+### 🔄 **Comandos de desarrollo**
+
 Correr el modo desarrollador
 
 ```bash
