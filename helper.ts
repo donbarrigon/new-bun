@@ -128,6 +128,9 @@ async function initCommand(): Promise<void> {
   // executeCommand(`git remote add origin https://github.com/${projectName}.git`, '🔗 Añadiendo repositorio remoto')
   // executeCommand('git push -u origin main', '🚀 Subiendo cambios al repositorio remoto')
 
+  // 6. Abriendo vs code
+  executeCommand('code .', '📘 Abriendo proyecto en Visual Studio Code')
+
   console.log(`${colors.bold}${colors.green}🎉 Proyecto inicializado exitosamente!${colors.reset}`)
 }
 
@@ -156,6 +159,9 @@ async function forkCommand(): Promise<void> {
   // 5. Añadir nuevo origin y push
   // executeCommand(`git remote add origin https://github.com/${projectName}.git`, '🔗 Añadiendo nuevo repositorio origin')
   // executeCommand('git push -u origin main', '🚀 Subiendo cambios al repositorio remoto')
+
+  // 6. Abriendo vs code
+  executeCommand('code .', '📘 Abriendo proyecto en Visual Studio Code')
 
   console.log(`${colors.bold}${colors.green}🎉 Fork configurado exitosamente!${colors.reset}`)
 }
