@@ -24,13 +24,13 @@ bun helper init
 Opción 2. Iniciar el proyecto como fork
 
 ```bash
-bun helper fork
+bun helper init:fork
 ```
 
 Si iniciaste el proyecto como un fork, puedes descargar actualizaciones con:
 
 ```bash
-bun helper update
+bun helper merge:upstream
 ```
 
 ⚠️ **Nota importante sobre actualizaciones**  

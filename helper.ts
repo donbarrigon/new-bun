@@ -84,7 +84,8 @@ function updatePackageJson(projectName: string): void {
 async function getProjectName(): Promise<string> {
   while (true) {
     const projectName = await askQuestion(
-      `${colors.blue}Ingresa el nombre del proyecto (formato: usuarioDeGit/nombreDelProyecto): ${colors.reset}`
+      `${colors.blue}Ingresa el nombre del proyecto (formato: usuarioDeGit/nombreDelProyecto): ${colors.reset}
+      `
     )
 
     if (!projectName) {
@@ -110,32 +111,32 @@ async function initCommand(): Promise<void> {
 
   console.log(`\n${colors.bold}Iniciando configuración del proyecto: ${projectName}${colors.reset}\n`)
 
-  // 1. Actualizar package.json
+  // Actualizar package.json
   updatePackageJson(projectName)
 
-  // 2. Eliminar historial de Git
+  // Eliminar historial de Git
   executeCommand('rm -rf .git', '📁 Eliminando historial de Git existente')
 
-  // 3. Instalar dependencias
+  // Instalar dependencias
   executeCommand('bun install', '📦 Instalando dependencias')
 
-  // 4. Inicializar nuevo repositorio Git
+  // Inicializar nuevo repositorio Git
   executeCommand('git init', '🔧 Inicializando nuevo repositorio Git')
   executeCommand('git add .', '📦 Agregando archivos al staging')
   executeCommand('git commit -m "feat: initial commit from donbarrigon/new-bun"', '💾 Realizando commit inicial')
 
-  // 5. Añadir repositorio remoto
+  // Añadir repositorio remoto
   // executeCommand(`git remote add origin https://github.com/${projectName}.git`, '🔗 Añadiendo repositorio remoto')
   // executeCommand('git push -u origin main', '🚀 Subiendo cambios al repositorio remoto')
 
-  // 6. Abriendo vs code
-  executeCommand('code .', '📘 Abriendo proyecto en Visual Studio Code')
+  // Abriendo vs code
+  // executeCommand('code .', '📘 Abriendo proyecto en Visual Studio Code')
 
   console.log(`${colors.bold}${colors.green}🎉 Proyecto inicializado exitosamente!${colors.reset}`)
 }
 
 // Comando fork
-async function forkCommand(): Promise<void> {
+async function initForkCommand(): Promise<void> {
   console.log(`${colors.bold}${colors.magenta}🍴 Configurando fork del proyecto${colors.reset}\n`)
 
   checkPackageJson()
@@ -143,31 +144,31 @@ async function forkCommand(): Promise<void> {
 
   console.log(`\n${colors.bold}Configurando fork para: ${projectName}${colors.reset}\n`)
 
-  // 1. Actualizar package.json
+  // Actualizar package.json
   updatePackageJson(projectName)
 
-  // 2. Instalar dependencias
+  // Instalar dependencias
   executeCommand('bun install', '📦 Instalando dependencias')
 
-  // 3. Renombrar origin a upstream
+  // Renombrar origin a upstream
   executeCommand('git remote rename origin upstream', '🔄 Renombrando origin a upstream')
 
-  // 4. Commit
+  // Commit
   executeCommand('git add .', '📦 Agregando cambios al staging')
   executeCommand('git commit -m "feat: initial commit from donbarrigon/new-bun"', '💾 Realizando commit inicial')
 
-  // 5. Añadir nuevo origin y push
+  // Añadir nuevo origin y push
   // executeCommand(`git remote add origin https://github.com/${projectName}.git`, '🔗 Añadiendo nuevo repositorio origin')
   // executeCommand('git push -u origin main', '🚀 Subiendo cambios al repositorio remoto')
 
-  // 6. Abriendo vs code
-  executeCommand('code .', '📘 Abriendo proyecto en Visual Studio Code')
+  // Abriendo vs code
+  // executeCommand('code .', '📘 Abriendo proyecto en Visual Studio Code')
 
   console.log(`${colors.bold}${colors.green}🎉 Fork configurado exitosamente!${colors.reset}`)
 }
 
 // Comando update
-function updateCommand(): void {
+function mergeUpstreamCommand(): void {
   console.log(`${colors.bold}${colors.magenta}🔄 Actualizando desde upstream${colors.reset}\n`)
 
   executeCommand('git fetch upstream', '📥 Obteniendo cambios del upstream')
@@ -182,14 +183,14 @@ function showHelp(): void {
   console.log(`${colors.bold}Uso:${colors.reset}`)
   console.log(`  bun helper <comando>\n`)
   console.log(`${colors.bold}Comandos disponibles:${colors.reset}`)
-  console.log(`  ${colors.green}init${colors.reset}     Inicializar un nuevo proyecto desde kit`)
-  console.log(`  ${colors.green}fork${colors.reset}     Configurar un fork del proyecto actual`)
-  console.log(`  ${colors.green}update${colors.reset}   Actualizar desde el repositorio upstream`)
-  console.log(`  ${colors.green}help${colors.reset}     Mostrar esta ayuda\n`)
+  console.log(`  ${colors.green}init${colors.reset}           Inicializar un nuevo proyecto desde kit`)
+  console.log(`  ${colors.green}init:fork${colors.reset}      Configurar un fork del proyecto actual`)
+  console.log(`  ${colors.green}merge:upstream${colors.reset} Actualizar desde el repositorio upstream`)
+  console.log(`  ${colors.green}help${colors.reset}           Mostrar esta ayuda\n`)
   console.log(`${colors.bold}Ejemplos:${colors.reset}`)
   console.log(`  bun helper init`)
-  console.log(`  bun helper fork`)
-  console.log(`  bun helper update`)
+  console.log(`  bun helper init:fork`)
+  console.log(`  bun helper merge:upstream`)
 }
 
 // Función principal
@@ -206,11 +207,11 @@ async function main(): Promise<void> {
       case 'init':
         await initCommand()
         break
-      case 'fork':
-        await forkCommand()
+      case 'init:fork':
+        await initForkCommand()
         break
-      case 'update':
-        updateCommand()
+      case 'merge:upstream':
+        mergeUpstreamCommand()
         break
       default:
         console.error(`${colors.red}✗ Comando desconocido: ${command}${colors.reset}\n`)
