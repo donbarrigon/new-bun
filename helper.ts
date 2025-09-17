@@ -124,7 +124,10 @@ async function initCommand(): Promise<void> {
   // 2. Eliminar historial de Git
   executeCommand('rm -rf .git', '📁 Eliminando historial de Git existente')
 
-  // 3. Inicializar nuevo repositorio Git
+  // 3. Instalar dependencias
+  executeCommand('bun install', '📦 Instalando dependencias')
+
+  // 4. Inicializar nuevo repositorio Git
   executeCommand('git init', '🔧 Inicializando nuevo repositorio Git')
   executeCommand('git add .', '📦 Agregando archivos al staging')
   executeCommand(
@@ -132,15 +135,12 @@ async function initCommand(): Promise<void> {
     '💾 Realizando commit inicial'
   )
 
-  // 4. Añadir repositorio remoto
+  // 5. Añadir repositorio remoto
   executeCommand(
     `git remote add origin https://github.com/${projectName}.git`,
     '🔗 Añadiendo repositorio remoto'
   )
-  executeCommand('git push -u origin main', '🚀 Subiendo cambios al repositorio remoto')
-
-  // 5. Instalar dependencias
-  executeCommand('bun install', '📦 Instalando dependencias')
+  // executeCommand('git push -u origin main', '🚀 Subiendo cambios al repositorio remoto')
 
   console.log(`${colors.bold}${colors.green}🎉 Proyecto inicializado exitosamente!${colors.reset}`)
 }
@@ -157,25 +157,25 @@ async function forkCommand(): Promise<void> {
   // 1. Actualizar package.json
   updatePackageJson(projectName)
 
-  // 2. Renombrar origin a upstream
+  // 2. Instalar dependencias
+  executeCommand('bun install', '📦 Instalando dependencias')
+
+  // 3. Renombrar origin a upstream
   executeCommand('git remote rename origin upstream', '🔄 Renombrando origin a upstream')
 
-  // 3. Añadir nuevo origin
+  // 4. Añadir nuevo origin
   executeCommand(
     `git remote add origin https://github.com/${projectName}.git`,
     '🔗 Añadiendo nuevo repositorio origin'
   )
 
-  // 4. Commit y push
+  // 5. Commit y push
   executeCommand('git add .', '📦 Agregando cambios al staging')
   executeCommand(
     'git commit -m "feat: initial commit from donbarrigon/new-bun"',
     '💾 Realizando commit inicial'
   )
-  executeCommand('git push -u origin main', '🚀 Subiendo cambios al repositorio remoto')
-
-  // 5. Instalar dependencias
-  executeCommand('bun install', '📦 Instalando dependencias')
+  // executeCommand('git push -u origin main', '🚀 Subiendo cambios al repositorio remoto')
 
   console.log(`${colors.bold}${colors.green}🎉 Fork configurado exitosamente!${colors.reset}`)
 }
