@@ -9,8 +9,8 @@ La idea es que no te toque arrancar de cero cada que vas a montar un proyecto, s
 ### 1. 🌀 Clonar el repositorio
 
 ```bash
-git clone https://github.com/donbarrigon/new-bun.git projectName
-cd projectName
+git clone https://github.com/donbarrigon/new-bun.git name
+cd name
 ```
 
 ### 2. 🚀 Iniciar el proyecto y descargar dependencias
