@@ -1,7 +1,7 @@
-import { appLayout } from '../components/appLayout.ts'
+import { appLayout } from '../../components/appLayout.ts'
 
 interface Props {}
-export const home = () => {
+export const homePage = () => {
   return appLayout({
     title: 'Home page',
     slot: /*html*/ `
@@ -10,3 +10,5 @@ export const home = () => {
     `,
   })
 }
+
+// retorna los archivos de la carpeta public

@@ -1,6 +1,6 @@
 import { env } from './env'
-import { view } from '../app/views/view.ts'
-import { AppError } from '../app/errors/errors'
+import { view } from '../app/shared/view/view.ts'
+import { AppError } from '../app/shared/errors/errors.ts'
 
 export default () => {
   globalThis.config = env

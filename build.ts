@@ -45,15 +45,15 @@ class BuildManager {
 
   private async compileTypeScript() {
     try {
-      if (!existsSync('resources/ts')) {
-        console.log('⚠️  Directorio resources/ts no existe')
+      if (!existsSync('app/iu/resources/ts')) {
+        console.log('⚠️  Directorio app/iu/resources/ts no existe')
         return
       }
 
-      const files = await this.getFilesRecursively('resources/ts', '.ts')
+      const files = await this.getFilesRecursively('app/iu/resources/ts', '.ts')
 
       for (const file of files) {
-        const relativePath = file.replace('resources/ts/', '')
+        const relativePath = file.replace('app/iu/resources/ts/', '')
         const outputPath = join('public/js', relativePath.replace('.ts', '.js'))
         const outputDir = outputPath.substring(0, outputPath.lastIndexOf('/'))
 
@@ -83,15 +83,15 @@ class BuildManager {
 
   private async copyCSS() {
     try {
-      if (!existsSync('resources/css')) {
-        console.log('⚠️  Directorio resources/css no existe')
+      if (!existsSync('app/iu/resources/css')) {
+        console.log('⚠️  Directorio app/iu/resources/css no existe')
         return
       }
 
-      const files = await this.getFilesRecursively('resources/css', '.css')
+      const files = await this.getFilesRecursively('app/iu/resources/css', '.css')
 
       for (const file of files) {
-        const relativePath = file.replace('resources/css/', '')
+        const relativePath = file.replace('app/iu/resources/css/', '')
         const outputPath = join('public/css', relativePath)
         const outputDir = outputPath.substring(0, outputPath.lastIndexOf('/'))
 
@@ -120,10 +120,7 @@ class BuildManager {
     }
   }
 
-  private async getFilesRecursively(
-    dir: string,
-    extension: string
-  ): Promise<string[]> {
+  private async getFilesRecursively(dir: string, extension: string): Promise<string[]> {
     const files: string[] = []
 
     try {
@@ -177,31 +174,23 @@ class BuildManager {
 
   private watchResources() {
     // Watch TypeScript files
-    if (existsSync('resources/ts')) {
-      watch(
-        'resources/ts',
-        { recursive: true },
-        async (eventType, filename) => {
-          if (filename && filename.endsWith('.ts')) {
-            console.log(`📝 Cambio detectado en TS: ${filename}`)
-            await this.compileTypeScript()
-          }
+    if (existsSync('app/iu/resources/ts')) {
+      watch('app/iu/resources/ts', { recursive: true }, async (eventType, filename) => {
+        if (filename && filename.endsWith('.ts')) {
+          console.log(`📝 Cambio detectado en TS: ${filename}`)
+          await this.compileTypeScript()
         }
-      )
+      })
     }
 
     // Watch CSS files
-    if (existsSync('resources/css')) {
-      watch(
-        'resources/css',
-        { recursive: true },
-        async (eventType, filename) => {
-          if (filename && filename.endsWith('.css')) {
-            console.log(`🎨 Cambio detectado en CSS: ${filename}`)
-            await this.copyCSS()
-          }
+    if (existsSync('app/iu/resources/css')) {
+      watch('app/iu/resources/css', { recursive: true }, async (eventType, filename) => {
+        if (filename && filename.endsWith('.css')) {
+          console.log(`🎨 Cambio detectado en CSS: ${filename}`)
+          await this.copyCSS()
         }
-      )
+      })
     }
   }
 

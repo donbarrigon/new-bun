@@ -1,7 +1,6 @@
 import initConfig from './config/config.ts'
 import { appRoutes } from './routes/appRoutes.ts'
-import { connectDB, closeDB } from './app/repositories/repository.ts'
-import { publicFiles } from './app/controllers/home.ts'
+import { connectDB, closeDB } from './app/shared/db/db.ts'
 
 initConfig()
 connectDB()

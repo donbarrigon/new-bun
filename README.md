@@ -1,8 +1,8 @@
 # New-bun
 
-Este es un punto de partida pa’ arrancar proyectos con **Bun** y **MongoDB**, usando una estructura **MVC** bien organizada, con **SSR** y el **patrón Repository**, todo montado como a mí me gusta: sencillo, práctico y sin dependencias.
+Este es un punto de partida pa’ arrancar mis proyectos con **Bun** y **MongoDB**, usando una estructura **mvc** bien organizada, con **SSR**, todo montado como a mí me gusta: sencillo y sin exceso de dependencias.
 
-La idea es que no te toque arrancar de cero cada que vas a montar un proyecto, sino que ya tengas la base lista pa’ empezar a meterle funcionalidad de una. 🚀
+La idea es que no me toque arrancar de cero cada que vaya a montar un proyecto, sino que ya tenga la base lista pa’ empezar a meterle funcionalidad de una. 🚀
 
 ## 📥 Instalación
 

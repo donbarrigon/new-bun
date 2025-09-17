@@ -1,10 +1,8 @@
-import { home } from '../views/home/index.ts'
-
-export const index = async ({}: Request): Promise<Response> => {
-  return view(home())
+import { homePage } from '../ui/views/home/index.ts'
+export const index = () => {
+  return view(homePage())
 }
 
-// retorna los archivos de la carpeta public
 export const publicFiles = async (req: Request): Promise<Response> => {
   const url = new URL(req.url)
 

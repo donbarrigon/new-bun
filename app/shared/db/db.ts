@@ -1,4 +1,10 @@
-import { MongoClient, Db } from 'mongodb'
+import { MongoClient, Db, ObjectId } from 'mongodb'
+
+export type Document = {
+  _id: ObjectId
+  createdAt: Date
+  updatedAt: Date
+}
 
 let client: MongoClient | null = null
 let db: Db | null = null
