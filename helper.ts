@@ -60,9 +60,7 @@ function executeCommand(command: string, description?: string): void {
 // Función para verificar que existe package.json
 function checkPackageJson(): void {
   if (!existsSync('package.json')) {
-    console.error(
-      `${colors.red}✗ No se encontró package.json en el directorio actual${colors.reset}`
-    )
+    console.error(`${colors.red}✗ No se encontró package.json en el directorio actual${colors.reset}`)
     process.exit(1)
   }
 }
@@ -75,9 +73,7 @@ function updatePackageJson(projectName: string): void {
     packageJson.name = projectNameOnly
 
     writeFileSync('package.json', JSON.stringify(packageJson, null, 2))
-    console.log(
-      `${colors.green}✓ package.json actualizado - name: ${projectNameOnly}${colors.reset}\n`
-    )
+    console.log(`${colors.green}✓ package.json actualizado - name: ${projectNameOnly}${colors.reset}\n`)
   } catch (error) {
     console.error(`${colors.red}✗ Error actualizando package.json: ${error}${colors.reset}`)
     process.exit(1)
@@ -97,9 +93,7 @@ async function getProjectName(): Promise<string> {
     }
 
     if (!validateProjectName(projectName)) {
-      console.log(
-        `${colors.red}✗ Formato incorrecto. Usa el formato: usuarioDeGit/nombreDelProyecto${colors.reset}`
-      )
+      console.log(`${colors.red}✗ Formato incorrecto. Usa el formato: usuarioDeGit/nombreDelProyecto${colors.reset}`)
       continue
     }
 
@@ -114,9 +108,7 @@ async function initCommand(): Promise<void> {
   checkPackageJson()
   const projectName = await getProjectName()
 
-  console.log(
-    `\n${colors.bold}Iniciando configuración del proyecto: ${projectName}${colors.reset}\n`
-  )
+  console.log(`\n${colors.bold}Iniciando configuración del proyecto: ${projectName}${colors.reset}\n`)
 
   // 1. Actualizar package.json
   updatePackageJson(projectName)
@@ -130,16 +122,10 @@ async function initCommand(): Promise<void> {
   // 4. Inicializar nuevo repositorio Git
   executeCommand('git init', '🔧 Inicializando nuevo repositorio Git')
   executeCommand('git add .', '📦 Agregando archivos al staging')
-  executeCommand(
-    'git commit -m "feat: initial commit from donbarrigon/new-bun"',
-    '💾 Realizando commit inicial'
-  )
+  executeCommand('git commit -m "feat: initial commit from donbarrigon/new-bun"', '💾 Realizando commit inicial')
 
   // 5. Añadir repositorio remoto
-  executeCommand(
-    `git remote add origin https://github.com/${projectName}.git`,
-    '🔗 Añadiendo repositorio remoto'
-  )
+  // executeCommand(`git remote add origin https://github.com/${projectName}.git`, '🔗 Añadiendo repositorio remoto')
   // executeCommand('git push -u origin main', '🚀 Subiendo cambios al repositorio remoto')
 
   console.log(`${colors.bold}${colors.green}🎉 Proyecto inicializado exitosamente!${colors.reset}`)
@@ -163,18 +149,12 @@ async function forkCommand(): Promise<void> {
   // 3. Renombrar origin a upstream
   executeCommand('git remote rename origin upstream', '🔄 Renombrando origin a upstream')
 
-  // 4. Añadir nuevo origin
-  executeCommand(
-    `git remote add origin https://github.com/${projectName}.git`,
-    '🔗 Añadiendo nuevo repositorio origin'
-  )
-
-  // 5. Commit y push
+  // 4. Commit
   executeCommand('git add .', '📦 Agregando cambios al staging')
-  executeCommand(
-    'git commit -m "feat: initial commit from donbarrigon/new-bun"',
-    '💾 Realizando commit inicial'
-  )
+  executeCommand('git commit -m "feat: initial commit from donbarrigon/new-bun"', '💾 Realizando commit inicial')
+
+  // 5. Añadir nuevo origin y push
+  // executeCommand(`git remote add origin https://github.com/${projectName}.git`, '🔗 Añadiendo nuevo repositorio origin')
   // executeCommand('git push -u origin main', '🚀 Subiendo cambios al repositorio remoto')
 
   console.log(`${colors.bold}${colors.green}🎉 Fork configurado exitosamente!${colors.reset}`)
