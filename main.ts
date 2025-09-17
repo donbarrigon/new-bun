@@ -1,19 +1,15 @@
-import routes from './routes/routes.ts'
 import initConfig from './config/config.ts'
-import { connectDB, closeDB } from './app/repositories/db.ts'
-import { staticFiles } from './app/controllers/home.ts'
+import { appRoutes } from './routes/appRoutes.ts'
+import { connectDB, closeDB } from './app/repositories/repository.ts'
+import { publicFiles } from './app/controllers/home.ts'
 
 initConfig()
 connectDB()
 
 const server = Bun.serve({
   port: config.serverPort,
-  routes: routes(),
-  fetch(req: Request) {
-    const url = new URL(req.url)
-    if (url.pathname.startsWith('/public/')) {
-      return staticFiles(req)
-    }
+  routes: appRoutes(),
+  fetch({}: Request) {
     return new Response('Not found', {
       status: 404,
       headers: { 'Content-Type': 'text/html' },

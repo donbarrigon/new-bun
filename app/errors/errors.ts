@@ -8,11 +8,7 @@ export class AppError extends Error {
   public status: number
   public error: any
 
-  constructor({
-    status = 500,
-    message = 'Something went wrong',
-    error = null,
-  }: Props) {
+  constructor({ status = 500, message = 'Something went wrong', error = null }: Props) {
     super(message)
     this.status = status
     this.error = error

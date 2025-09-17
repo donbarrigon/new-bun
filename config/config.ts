@@ -1,9 +1,9 @@
 import { env } from './env'
-import { render } from '../utils/render'
-import { AppError } from '../utils/errors'
+import { view } from '../app/views/view.ts'
+import { AppError } from '../app/errors/errors'
 
 export default () => {
   globalThis.config = env
-  globalThis.render = render
+  globalThis.view = view
   globalThis.AppError = AppError
 }

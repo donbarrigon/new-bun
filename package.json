@@ -1,6 +1,6 @@
 {
   "name": "starter-kit-bun",
-  "module": "index.ts",
+  "module": "main.ts",
   "type": "module",
   "private": true,
   "scripts": {

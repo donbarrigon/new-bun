@@ -1,10 +1,10 @@
-import type { env } from './config/env'
-import type { render } from './utils/render'
-import type { AppError } from './utils/errors'
+import type { env } from './config/env.ts'
+import type { view } from './app/views/view.ts'
+import type { AppError } from './app/errors/errors.ts'
 
 declare global {
   var config: typeof env
-  var render: typeof render
+  var view: typeof view
   var AppError: typeof AppError
 }
 
