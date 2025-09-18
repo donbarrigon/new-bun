@@ -1,5 +1,5 @@
 import initConfig from './config/config.ts'
-import { appRoutes } from './routes/appRoutes.ts'
+import { appRoutes } from './routes/app-routes.ts'
 import { connectDB, closeDB } from './app/shared/db/db.ts'
 
 initConfig()

@@ -1,9 +1,9 @@
 import { env } from './env'
 import { view } from '../app/shared/view/view.ts'
-import { AppError } from '../app/shared/errors/errors.ts'
+import { HttpError } from '../app/shared/errors/HttpErrors.ts'
 
 export default () => {
   globalThis.config = env
   globalThis.view = view
-  globalThis.AppError = AppError
+  globalThis.AppError = HttpError
 }

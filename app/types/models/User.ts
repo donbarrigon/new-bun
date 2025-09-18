@@ -5,8 +5,8 @@ export interface User extends Document {
   password: string
 }
 
-export interface UserProfile extends Document {
-  name: string
-  nickName: string
-  phone: string
+export interface UserProfile {
+  name?: string
+  nickname: string
+  phone?: string
 }

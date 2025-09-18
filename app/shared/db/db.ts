@@ -9,7 +9,7 @@ export type Document = {
 let client: MongoClient | null = null
 let db: Db | null = null
 
-export const connectDB = async (): Promise<void> => {
+export async function connectDB(): Promise<void> {
   if (!client) {
     client = new MongoClient(config.dbConectionString)
     await client.connect()
@@ -17,7 +17,7 @@ export const connectDB = async (): Promise<void> => {
     console.log('✅ Conectado a MongoDB')
   }
 }
-export const getDB = async (): Promise<Db> => {
+export async function getDB(): Promise<Db> {
   if (!db) {
     await connectDB()
     db = client!.db(config.dbName)
@@ -25,7 +25,7 @@ export const getDB = async (): Promise<Db> => {
   return db
 }
 
-export const closeDB = async () => {
+export async function closeDB(): Promise<void> {
   if (client) {
     await client.close()
     client = null
