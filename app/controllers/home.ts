@@ -1,9 +1,9 @@
 import { homePage } from '../ui/views/home/index.ts'
-export const index = () => {
+export async function index() {
   return view(homePage())
 }
 
-export const publicFiles = async (req: Request): Promise<Response> => {
+export async function publicFiles(req: Request): Promise<Response> {
   const url = new URL(req.url)
 
   const filePath = url.pathname.replace(/^\/public\//, '')

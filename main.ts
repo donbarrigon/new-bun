@@ -8,8 +8,8 @@ connectDB()
 const server = Bun.serve({
   port: config.serverPort,
   routes: appRoutes(),
-  fetch({}: Request) {
-    return new Response('Not found', {
+  fetch({ url }: Request) {
+    return new Response('[' + url + '] Not found', {
       status: 404,
       headers: { 'Content-Type': 'text/html' },
     })
