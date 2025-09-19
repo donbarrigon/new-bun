@@ -1,5 +1,5 @@
-import { HttpError } from '../shared/errors/HttpErrors'
-export function handlerError(handler: (req: Request) => Promise<Response>) {
+import type { Controller } from '../../routes/routes'
+export function handlerError(handler: Controller): Controller {
   return async function (req: Request): Promise<Response> {
     try {
       return await handler(req)

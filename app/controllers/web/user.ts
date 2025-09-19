@@ -1,9 +1,9 @@
-import { loginPage } from '../../ui/views/login'
-import { signupPage } from '../../ui/views/singup'
+import { loginPage } from '../../ui/views/user/login'
+import { signupPage } from '../../ui/views/user/singup'
 export async function userLogin(): Promise<Response> {
   return view(loginPage())
 }
 
-export async function userCreate(): Promise<Response> {
+export async function userSingup(): Promise<Response> {
   return view(signupPage())
 }

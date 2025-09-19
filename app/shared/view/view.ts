@@ -1,4 +1,4 @@
-export const view = (html: string): Response => {
+export function view(html: string): Response {
   return new Response(
     html
       .replace(/<!--.*?-->/gs, '') // elimina comentarios

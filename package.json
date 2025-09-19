@@ -6,10 +6,10 @@
   "scripts": {
     "dev": "bun build.ts dev",
     "build": "bun build.ts build",
-    "lint": "eslint src/**/*.ts",
-    "lint:fix": "eslint src/**/*.ts --fix",
-    "format": "prettier --write src/**/*.ts",
-    "format:check": "prettier --check src/**/*.ts"
+    "lint": "eslint ./**/*.ts",
+    "lint:fix": "eslint ./**/*.ts --fix",
+    "format": "prettier --write ./**/*.ts",
+    "format:check": "prettier --check ./**/*.ts"
   },
   "devDependencies": {
     "@types/bun": "latest",

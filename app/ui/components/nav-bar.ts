@@ -15,7 +15,7 @@ export const navBar = ({}: Props) => {
 				<!-- NAVEGACIÓN (CENTRO) -->
 				<ul class="navbar-nav">
 					<li class="nav-item">
-						<a href="/" class="nav-link">Home</a>
+						<a href="${route('home')}" class="nav-link">Home</a>
 					</li>
 					<li class="nav-item">
 						<a href="https://bun.com/" class="nav-link">Bun</a>
@@ -27,8 +27,8 @@ export const navBar = ({}: Props) => {
 				
 				<!-- BOTONES (DERECHA) -->
 				<div class="navbar-buttons">
-					<a href="/login" class="btn-cyberpunk btn-login">Login</a>
-					<a href="/signup" class="btn-cyberpunk btn-signup">Sign Up</a>
+					<a href="${route('user.login')}" class="btn-cyberpunk btn-login">Login</a>
+					<a href="${route('user.signup')}" class="btn-cyberpunk btn-signup">Sign Up</a>
 				</div>
 			</div>
 		</nav>

@@ -1,8 +1,8 @@
-import initConfig from './config/config.ts'
+import { initGlobals } from './config/config.ts'
 import { appRoutes } from './routes/app-routes.ts'
 import { connectDB, closeDB } from './app/shared/db/db.ts'
 
-initConfig()
+initGlobals()
 connectDB()
 
 const server = Bun.serve({

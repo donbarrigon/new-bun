@@ -22,7 +22,7 @@
 
   // Corrección automática de ESLint al guardar
   "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": true
+    "source.fixAll.eslint": "explicit"
   },
 
   // Lenguajes donde se aplica ESLint

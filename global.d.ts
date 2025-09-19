@@ -1,11 +1,20 @@
-import type { env } from './config/env.ts'
-import type { view } from './app/shared/view/view.ts'
-import type { HttpError } from './app/shared/errors/HttpErrors.ts'
+import type { env } from './config/env'
+import type { view as viewFunc } from './app/shared/view/view'
+import type { route as routeFunc } from './routes/routes'
+import type { HttpError as HttpErrorClass } from './app/shared/errors/HttpErrors'
 
 declare global {
-  var config: typeof env
-  var view: typeof view
-  var AppError: typeof AppError
+  /** Configuración global de la app */
+  const config: typeof env
+
+  /** Motor de vistas */
+  const view: typeof viewFunc
+
+  /** Helper para generar URLs de rutas GET */
+  const route: typeof routeFunc
+
+  /** Clase base para errores HTTP */
+  const HttpError: typeof HttpErrorClass
 }
 
 export {}

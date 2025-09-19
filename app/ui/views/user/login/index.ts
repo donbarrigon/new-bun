@@ -1,9 +1,9 @@
-import { appLayout } from '../../components/layout/app-layout'
+import { appLayout } from '../../../components/layout/app-layout'
 
 export function loginPage(): string {
   return appLayout({
     title: 'Login',
-    css: ['login.css'],
+    css: ['../public/css/login.css'],
     slot: /*html*/ `
       <div class="login-wrapper">
         <div class="login-box">

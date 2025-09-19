@@ -6,13 +6,16 @@ export class ValidatorErrors {
   }
 
   hasErrors(): void {
-    if (Object.keys(this.errors).length > 0) {
+    // if (Object.keys(this.errors).length > 0) {
+    //   throw HttpError.badRequest(this.errors)
+    // }
+    for (const _ in this.errors) {
       throw HttpError.badRequest(this.errors)
     }
   }
 
-  append(bool: boolean, key: string, message: string): void {
-    if (!bool) return
+  append(check: boolean, key: string, message: string): void {
+    if (!check) return
     ;(this.errors[key] ??= []).push(message)
   }
 }
