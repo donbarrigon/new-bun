@@ -1,4 +1,4 @@
-import { ValidatorErrors } from '../../shared/errors/ValidatorErrors'
+import { ValidatorErrors } from '../../utils/errors/ValidatorErrors'
 import { isEmail, isUserName, isPersonalName, isUnique, isPhoneNumber } from '../validator'
 
 export interface UserStore {

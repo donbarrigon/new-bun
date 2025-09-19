@@ -1,3 +1,5 @@
+import { MongoServerError } from 'mongodb'
+
 interface Props {
   status?: number
   message?: string
@@ -25,6 +27,17 @@ export class HttpError extends Error {
           error: e.error,
         },
         { status: e.status }
+      )
+    }
+
+    if (e instanceof MongoServerError) {
+      const m = mongoError(e)
+      return Response.json(
+        {
+          message: m.message,
+          error: m.error,
+        },
+        { status: m.status }
       )
     }
 
@@ -175,8 +188,106 @@ export class HttpError extends Error {
     })
   }
   static httpVersionNotSupported(error?: any) {
-    return new HttpError({ status: 505, message: 'Versión HTTP no soportada', error: errorData(error) })
+    return new HttpError({
+      status: 505,
+      message: 'Versión HTTP no soportada',
+      error: errorData(error),
+    })
   }
+}
+
+/**
+ * Convierte errores de MongoDB a HttpError según su código o tipo
+ * @param err Error recibido en el catch
+ * @return HttpError correspondiente
+ */
+export function mongoError(e: any): HttpError {
+  if (!e) return HttpError.internal('Error desconocido de la base de datos')
+
+  // --- 1. Errores de duplicidad ---
+  // Violación de índice único o compuesto
+  if (e.code === 11000 || e.code === 11001) {
+    return HttpError.conflict({
+      message: 'Registro duplicado',
+      error: e.keyValue || e,
+    })
+  }
+
+  // --- 2. Error de validación de esquema ---
+  if (e.code === 121) {
+    return HttpError.badRequest({
+      message: 'Documento no válido según el esquema',
+      error: e.errmsg || e,
+    })
+  }
+
+  // --- 3. Document too large ---
+  if (e.code === 10334) {
+    return HttpError.payloadTooLarge({
+      message: 'Documento demasiado grande',
+      error: e.errmsg || e,
+    })
+  }
+
+  // --- 4. Write concern errors ---
+  if (e.code === 64 || e.code === 65 || e.code === 91) {
+    return HttpError.serviceUnavailable({
+      message: 'Error de escritura en la base de datos',
+      error: e,
+    })
+  }
+
+  // --- 5. Errores de conexión ---
+  if (e.name === 'MongoNetworkError' || e.name === 'MongoTimeoutError') {
+    return HttpError.serviceUnavailable(e)
+  }
+
+  // --- 6. Errores de tipo BSON ---
+  if (e.name === 'BSONTypeError') {
+    return HttpError.unprocessableEntity({
+      message: 'Tipo de dato no válido',
+      error: e.message,
+    })
+  }
+
+  // --- 7. Operación en nodo no primario ---
+  if (e.code === 10058 || e.message?.includes('not master')) {
+    return HttpError.serviceUnavailable({
+      message: 'Intento de escritura en un nodo secundario',
+      error: e,
+    })
+  }
+
+  // --- 8. Errores de autenticación/autorización ---
+  if (e.code === 13) {
+    return HttpError.unauthorized({
+      message: 'No autorizado',
+      error: e,
+    })
+  }
+
+  if (e.code === 8000) {
+    return HttpError.forbidden({
+      message: 'Operación prohibida',
+      error: e,
+    })
+  }
+
+  // --- 9. Error de índice inexistente ---
+  if (e.code === 27) {
+    return HttpError.badRequest({
+      message: 'Índice no existe',
+      error: e,
+    })
+  }
+
+  // --- 10. Errores generales de servidor Mongo ---
+  if (e.name === 'MongoServerError' || e.name === 'MongoError') {
+    return HttpError.internal(e)
+  }
+
+  // --- 11. Fallback ---
+  return HttpError.internal(e)
 }
 
 // Función privada del módulo para manejar errores

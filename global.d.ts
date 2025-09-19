@@ -1,7 +1,7 @@
 import type { env } from './config/env'
-import type { view as viewFunc } from './app/shared/view/view'
+import type { view as viewFunc } from './app/utils/view/view'
 import type { route as routeFunc } from './routes/routes'
-import type { HttpError as HttpErrorClass } from './app/shared/errors/HttpErrors'
+import type { HttpError as HttpErrorClass } from './app/utils/errors/HttpError'
 
 declare global {
   /** Configuración global de la app */

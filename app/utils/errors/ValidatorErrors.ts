@@ -1,4 +1,4 @@
-import { HttpError } from './HttpErrors.ts'
+import { HttpError } from './HttpError.ts'
 export class ValidatorErrors {
   errors: Record<string, string[]> = {}
   constructor(errors: Record<string, string[]> = {}) {

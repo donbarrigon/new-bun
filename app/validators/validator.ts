@@ -1,4 +1,4 @@
-import { getDB } from '../shared/db/db'
+import { getDB } from '../utils/db/db'
 
 const regex = {
   email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,

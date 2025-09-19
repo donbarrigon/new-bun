@@ -1,5 +1,4 @@
-import { handlerError } from '../app/middleware/handler-error.ts'
-import { HttpError } from '../app/shared/errors/HttpErrors.ts'
+import { HttpError } from '../app/utils/errors/HttpError.ts'
 
 export type Controller = (req: Request) => Promise<Response>
 export type Middleware = (handler: Controller) => Controller
@@ -7,7 +6,7 @@ export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD' | 
 export type RouteHandler = Partial<Record<HttpMethod, Controller>>
 export type RouteMap = Record<string, RouteHandler>
 
-const globalMiddlewares: Middleware[] = [handlerError]
+const globalMiddlewares: Middleware[] = []
 const globalprefixes: string[] = []
 const routeMap: RouteMap = {}
 const routeNameMap: Record<string, { method: string; path: string }> = {}
@@ -28,6 +27,19 @@ export function group(prefix: string, middlewares: Middleware[], callback: () =>
   globalMiddlewares.push(...middlewares)
   callback()
   prefixes.forEach(() => globalprefixes.pop())
+  middlewares.forEach(() => globalMiddlewares.pop())
+}
+
+export function prefix(prefix: string, callback: () => void) {
+  const prefixes = prefix.trim().split('/').filter(Boolean)
+  globalprefixes.push(...prefixes)
+  callback()
+  prefixes.forEach(() => globalprefixes.pop())
+}
+
+export function middleware(middlewares: Middleware[], callback: () => void) {
+  globalMiddlewares.push(...middlewares)
+  callback()
   middlewares.forEach(() => globalMiddlewares.pop())
 }
 

@@ -1,4 +1,4 @@
-import type { Document } from '../../shared/db/db.ts'
+import type { Document } from '../../utils/db/db.ts'
 export interface User extends Document {
   profile: UserProfile
   email: string
