@@ -1,4 +1,4 @@
-import type { Controller } from '../../routes/routes'
+import type { Controller } from '../utils/routes/routes'
 
 export function catchErrors(handler: Controller): Controller {
   return async function (req: Request): Promise<Response> {

@@ -1,0 +1,169 @@
+/* ===== CLASES PARA MENSAJES DE VALIDACIÓN ===== */
+
+/* Clase base para todos los mensajes */
+.form-message {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-family: var(--font-primary);
+  margin-top: var(--spacing-xs);
+  padding: var(--spacing-xs) 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 500;
+  opacity: 0;
+  transform: translateY(-5px);
+  transition: var(--transition-normal);
+}
+
+/* Mostrar mensaje cuando está activo */
+.form-message.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ===== MENSAJE DE ERROR ===== */
+.form-message.error {
+  color: var(--danger-neon);
+  text-shadow: 0 0 8px var(--danger-neon);
+}
+
+.form-message.error.active {
+  animation: pulseError 2s ease-in-out infinite;
+}
+
+/* ===== MENSAJE DE WARNING ===== */
+.form-message.warning {
+  color: var(--warning-neon);
+  text-shadow: 0 0 8px var(--warning-neon);
+}
+
+.form-message.warning.active {
+  animation: pulseWarning 2s ease-in-out infinite;
+}
+
+/* ===== MENSAJE DE SUCCESS ===== */
+.form-message.success {
+  color: var(--accent-neon);
+  text-shadow: 0 0 8px var(--accent-neon);
+}
+
+.form-message.success.active {
+  animation: pulseSuccess 1.5s ease-in-out infinite;
+}
+
+/* ===== MENSAJE DE INFO ===== */
+.form-message.info {
+  color: var(--primary-neon);
+  text-shadow: 0 0 8px var(--primary-neon);
+}
+
+.form-message.info.active {
+  animation: pulseInfo 2s ease-in-out infinite;
+}
+
+/* ===== ANIMACIONES DE PULSO ===== */
+@keyframes pulseError {
+  0%,
+  100% {
+    text-shadow: 0 0 8px var(--danger-neon);
+    opacity: 1;
+  }
+  50% {
+    text-shadow:
+      0 0 15px var(--danger-neon),
+      0 0 25px var(--danger-neon);
+    opacity: 0.8;
+  }
+}
+
+@keyframes pulseWarning {
+  0%,
+  100% {
+    text-shadow: 0 0 8px var(--warning-neon);
+    opacity: 1;
+  }
+  50% {
+    text-shadow:
+      0 0 15px var(--warning-neon),
+      0 0 25px var(--warning-neon);
+    opacity: 0.8;
+  }
+}
+
+@keyframes pulseSuccess {
+  0%,
+  100% {
+    text-shadow: 0 0 8px var(--accent-neon);
+    opacity: 1;
+  }
+  50% {
+    text-shadow:
+      0 0 15px var(--accent-neon),
+      0 0 25px var(--accent-neon);
+    opacity: 0.8;
+  }
+}
+
+@keyframes pulseInfo {
+  0%,
+  100% {
+    text-shadow: 0 0 8px var(--primary-neon);
+    opacity: 1;
+  }
+  50% {
+    text-shadow:
+      0 0 15px var(--primary-neon),
+      0 0 25px var(--primary-neon);
+    opacity: 0.8;
+  }
+}
+
+/* ===== VERSIONES ALTERNATIVAS SIN ANIMACIÓN ===== */
+.form-message.error-static {
+  color: var(--danger-neon);
+  text-shadow: 0 0 5px var(--danger-neon);
+}
+
+.form-message.warning-static {
+  color: var(--warning-neon);
+  text-shadow: 0 0 5px var(--warning-neon);
+}
+
+.form-message.success-static {
+  color: var(--accent-neon);
+  text-shadow: 0 0 5px var(--accent-neon);
+}
+
+.form-message.info-static {
+  color: var(--primary-neon);
+  text-shadow: 0 0 5px var(--primary-neon);
+}
+
+/* ===== ESTADOS DE INPUT SEGÚN VALIDACIÓN ===== */
+input.error,
+textarea.error,
+select.error {
+  border-color: var(--danger-neon);
+  box-shadow: 0 0 10px rgba(255, 48, 48, 0.3);
+}
+
+input.warning,
+textarea.warning,
+select.warning {
+  border-color: var(--warning-neon);
+  box-shadow: 0 0 10px rgba(255, 255, 0, 0.3);
+}
+
+input.success,
+textarea.success,
+select.success {
+  border-color: var(--accent-neon);
+  box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
+}
+
+input.info,
+textarea.info,
+select.info {
+  border-color: var(--primary-neon);
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+}

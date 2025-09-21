@@ -1,4 +1,4 @@
-import { MongoClient, Db, ObjectId } from 'mongodb'
+import { MongoClient, ObjectId } from 'mongodb'
 
 export type User = {
   _id: ObjectId
@@ -27,11 +27,11 @@ export async function connectDB() {
   console.log('👋 Conexión MongoDB establecida')
 }
 
-export function getDB() {
+export function db() {
   return client.db(config.dbName)
 }
 
-export function getCollection(name: string) {
+export function dbc(name: string) {
   return client.db(config.dbName).collection(name)
 }
 
@@ -45,7 +45,7 @@ export async function closeDB(): Promise<void> {
 export async function insertOne(collection: string, data: any) {
   data.createdAt = new Date()
   data.updatedAt = new Date()
-  const result = await getCollection(collection).insertOne(data)
+  const result = await dbc(collection).insertOne(data)
   data._id = result.insertedId
 }
 
@@ -55,7 +55,7 @@ export async function insertMany(collection: string, data: any[]) {
     d.updatedAt = new Date()
   })
 
-  const result = await getCollection(collection).insertMany(data)
+  const result = await dbc(collection).insertMany(data)
 
   data.forEach((d: any, i: number) => {
     d._id = result.insertedIds[i]
@@ -64,5 +64,5 @@ export async function insertMany(collection: string, data: any[]) {
 
 export async function updateOne(collection: string, id: string, data: any) {
   data.updatedAt = new Date()
-  await getCollection(collection).updateOne({ _id: new ObjectId(id) }, { $set: data })
+  await dbc(collection).updateOne({ _id: new ObjectId(id) }, { $set: data })
 }

@@ -1,84 +1,66 @@
-import { ValidatorErrors } from '../../utils/errors/ValidatorErrors'
-import { isEmail, isUserName, isPersonalName, isUnique, isPhoneNumber } from '../validator'
+import { ValidationErrors } from '../../utils/errors/ValidationErrors'
+import { isEmail, isNickname, isName, isPhoneNumber, isPassword } from '../validations/fields'
+import { toTitleCase } from '../formatters/strings'
+import bcrypt from 'bcrypt'
+import type { User } from '../../models/User'
 
-export interface UserStore {
-  email: string
-  password: string
-  profile: {
-    nickname: string
-    personalName: string
-    phoneNumber: string
-  }
-}
-export async function userStoreValidator(req: Request): Promise<UserStore> {
+export async function userStoreValidator(req: Request): Promise<User> {
   const body = await req.json()
-  const e = new ValidatorErrors()
+  const e = new ValidationErrors()
 
   // campos requeridos
-  e.append(!body['email'], 'email', 'El correo electrónico es requerido')
-  e.append(!body['password'], 'password', 'La contraseña es requerida')
-  e.append(!body['confirmPassword'], 'confirmPassword', 'La confirmación de la contraseña es requerida')
-  e.append(!body['profile'] || !body['profile']['nickname'], 'nickname', 'El nickname es requerido')
+  e.append('email', !body['email'] ? ['El correo electrónico es requerido'] : [])
+  e.append('password', !body['password'] ? ['La contraseña es requerida'] : [])
+  e.append(
+    'passwordConfirmation',
+    !body['passwordConfirmation'] ? ['La confirmación de la contraseña es requerida'] : []
+  )
+  e.append('nickname', !body['nickname'] ? ['El nickname es requerido'] : [])
 
   for (const key in body) {
     switch (key) {
       case 'email':
-        e.append(!isEmail(body[key]), key, 'El correo electrónico debe ser válido')
+        e.append(key, isEmail(body[key]))
         break
 
       case 'password':
-        e.append(
-          body[key]?.length < 8 || body[key]?.length > 32,
-          key,
-          'La contraseña debe tener entre 8 y 32 caracteres'
-        )
-        e.append(body['password'] !== body['confirmPassword'], key, 'Las contraseñas no coinciden')
+        e.append(key, isPassword(body[key], body['passwordConfirmation'] ?? ''))
         break
-      case 'confirmPassword':
+      case 'passwordConfirmation':
         break
 
-      case 'profile':
-        for (const k in body[key]) {
-          switch (k) {
-            case 'nickname':
-              e.append(
-                !isUserName(body[key][k]),
-                k,
-                'Nickname inválido: debe empezar con letra, contener solo letras, números, punto o guion bajo y tener entre 2 y 30 caracteres'
-              )
-              e.append(!(await isUnique('users', 'profile.nickname', body[key][k])), k, 'El nickname ya está en uso')
-              break
+      case 'nickname':
+        e.append(key, isNickname(body[key]))
+        break
 
-            case 'name':
-              e.append(
-                !isPersonalName(body[key][k]),
-                k,
-                'Nombre inválido: debe tener entre 1 y 255 caracteres y no permitir caracteres especiales'
-              )
-              break
+      case 'name':
+        e.append(key, isName(body[key]))
+        break
 
-            case 'phone':
-              e.append(
-                !isPhoneNumber(body[key][k]),
-                k,
-                'Teléfono inválido: opcional + al inicio, permite números, espacios, guiones y paréntesis'
-              )
-              break
-
-            default:
-              delete body[key][k]
-              break
-          }
-        }
+      case 'phone':
+        e.append(key, isPhoneNumber(body[key]))
         break
 
       default:
-        delete body[key]
         break
     }
   }
+  e.hasRequestErrors()
 
-  e.hasErrors()
-  delete body['confirmPassword']
-  return body
+  return {
+    _id: undefined,
+    email: body.email.toLowerCase(),
+    password: await bcrypt.hash(body.password, 10),
+    profile: {
+      nickname: body.nickname.toLowerCase(),
+      name: body.name ? toTitleCase(body.name) : undefined,
+      phone: body.phone ?? undefined,
+    },
+    role_ids: [],
+    roles: undefined,
+    permission_ids: [],
+    permissions: undefined,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  }
 }
