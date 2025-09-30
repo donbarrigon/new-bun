@@ -1,6 +1,6 @@
 import { userCreateRepository } from '../repositories/user'
-import { loginPage } from '../ui/views/user/login'
-import { signupPage } from '../ui/views/user/singup'
+import { loginPage } from '../../ui/views/user/login'
+import { signupPage } from '../../ui/views/user/singup'
 import { userStoreValidator } from '../validators/user/store'
 export async function userLogin(): Promise<Response> {
   return view(loginPage())

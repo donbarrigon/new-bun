@@ -1,6 +1,6 @@
-import { index, publicFiles } from '../app/controllers/home'
-import { catchErrors } from '../app/middleware/catch-errors'
-import { get, getRouteMap, type RouteMap, middleware } from '../app/utils/routes/routes'
+import { index, publicFiles } from '../controllers/home'
+import { catchErrors } from '../middleware/catch-errors'
+import { get, getRouteMap, type RouteMap, middleware } from '../../utils/router/router'
 import { userRoutes } from './user'
 
 export const appRoutes = (): RouteMap => {

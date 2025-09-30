@@ -1,23 +1,49 @@
-import './config/config.ts'
-import { appRoutes } from './routes/routes.ts'
-import { closeDB } from './app/repositories/db/mongo.ts'
+import { spawn } from 'bun'
 
-const server = Bun.serve({
-  port: config.serverPort,
-  routes: appRoutes(),
-  fetch({ url }: Request) {
-    return new Response('[' + url + '] Not found', {
-      status: 404,
-      headers: { 'Content-Type': 'text/html' },
+const cpus = navigator.hardwareConcurrency
+const buns = new Array(cpus)
+
+console.log(`⚡⚡ Iniciando ${cpus} clusters de Bun ⚡⚡`)
+
+for (let i = 0; i < cpus; i++) {
+  buns[i] = spawn({
+    cmd: ['bun', './app.ts'],
+    env: {
+      ...process.env,
+      WORKER_ID: String(i + 1), // ✨ Pasar ID del worker
+      WORKER_CPUS: String(cpus),
+    },
+    stdout: 'inherit',
+    stderr: 'inherit',
+    stdin: 'inherit',
+  })
+}
+
+async function shutdown() {
+  console.log('\n⚡ Cerrando clusters...')
+
+  const shutdownPromises = buns.map((bun, i) => {
+    bun.kill('SIGINT')
+    return bun.exited.then(() => {
+      console.log(`✓ Worker ${i + 1} cerrado`)
     })
-  },
-})
+  })
 
-process.on('SIGINT', async () => {
-  console.log('\n👋 Cerrando servidor...')
-  await closeDB()
-  server.stop()
+  const timeout = Bun.sleep(5000).then(() => {
+    console.log('⚠️  Timeout alcanzado, forzando cierre')
+  })
+
+  await Promise.race([Promise.all(shutdownPromises), timeout])
+
+  for (const bun of buns) {
+    if (!bun.exitCode) {
+      bun.kill('SIGKILL')
+    }
+  }
+
+  console.log('👋 Cluster cerrado')
   process.exit(0)
-})
+}
 
-console.log(`🚀 Servidor corriendo en http://localhost:${server.port}`)
+process.on('SIGINT', shutdown)
+process.on('SIGTERM', shutdown)

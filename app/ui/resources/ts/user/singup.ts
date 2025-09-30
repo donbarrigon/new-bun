@@ -1,4 +1,4 @@
-import { isEmail, isName, isNickname, isPassword, isPhoneNumber } from '../../../../validators/validations/fields'
+import { isEmail, isName, isNickname, isPassword, isPhoneNumber } from '../../../../utils/validations/fields'
 import { post } from '../../../../utils/fetch/api'
 
 // ==== Referencias de inputs y labels ====

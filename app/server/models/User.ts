@@ -1,6 +1,6 @@
 import { ObjectId } from 'mongodb'
 
-export interface User {
+export interface IUser {
   _id: ObjectId | undefined
   email: string
   password: string
@@ -10,21 +10,21 @@ export interface User {
     phone: string | undefined
   }
   role_ids: ObjectId[]
-  roles: Role[] | undefined // no guarda en la bd
+  roles: IRole[] | undefined // no guarda en la bd
   permission_ids: ObjectId[]
-  permissions: Permission[] | undefined // no guarda en la bd
+  permissions: IPermission[] | undefined // no guarda en la bd
   createdAt: Date
   updatedAt: Date
 }
 
-export interface Role {
+export interface IRole {
   _id: ObjectId
   name: string
   permision_ids: ObjectId[]
-  permissions: Permission[] | undefined // no guarda en la bd
+  permissions: IPermission[] | undefined // no guarda en la bd
 }
 
-export interface Permission {
+export interface IPermission {
   _id: ObjectId
   name: string
 }

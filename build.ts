@@ -195,7 +195,7 @@ class BuildManager {
   }
 
   private watchAppFiles() {
-    const watchPaths = ['app', 'main.ts']
+    const watchPaths = ['app', 'main.ts', 'app.ts']
 
     for (const path of watchPaths) {
       if (existsSync(path)) {

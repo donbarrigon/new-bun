@@ -1,10 +1,10 @@
-import { ValidationErrors } from '../../utils/errors/ValidationErrors'
-import { isEmail, isNickname, isName, isPhoneNumber, isPassword } from '../validations/fields'
-import { toTitleCase } from '../formatters/strings'
+import { ValidationErrors } from '../../../utils/errors/ValidationErrors'
+import { isEmail, isNickname, isName, isPhoneNumber, isPassword } from '../../../utils/validations/fields'
+import { toNameCase } from '../../../utils/format/strings'
 import bcrypt from 'bcrypt'
-import type { User } from '../../models/User'
+import type { IUser } from '../../models/User'
 
-export async function userStoreValidator(req: Request): Promise<User> {
+export async function userStoreValidator(req: Request): Promise<IUser> {
   const body = await req.json()
   const e = new ValidationErrors()
 
@@ -53,7 +53,7 @@ export async function userStoreValidator(req: Request): Promise<User> {
     password: await bcrypt.hash(body.password, 10),
     profile: {
       nickname: body.nickname.toLowerCase(),
-      name: body.name ? toTitleCase(body.name) : undefined,
+      name: body.name ? toNameCase(body.name) : undefined,
       phone: body.phone ?? undefined,
     },
     role_ids: [],

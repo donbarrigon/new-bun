@@ -1,4 +1,4 @@
-import { homePage } from '../ui/views/home/index'
+import { homePage } from '../../ui/views/home/index'
 export async function index() {
   return view(homePage())
 }

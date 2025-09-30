@@ -1,6 +1,6 @@
 import { env } from './env'
 import { view } from '../app/utils/view/view.ts'
-import { route } from '../app/utils/routes/routes.ts'
+import { route } from '../app/utils/router/router.ts'
 import { HttpError } from '../app/utils/errors/HttpError.ts'
 
 // ⚡ Aquí se asignan los valores reales a globalThis

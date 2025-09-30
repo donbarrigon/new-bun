@@ -1,11 +1,11 @@
-import type { User } from '../models/User'
-import { ValidationErrors } from '../utils/errors/ValidationErrors'
+import type { IUser } from '../models/User'
+import { ValidationErrors } from '../../utils/errors/ValidationErrors'
 import { dbc } from './db/mongo'
 
 //
 const collection = 'users'
 
-export async function userCreateRepository(user: User) {
+export async function userCreateRepository(user: IUser) {
   const e = new ValidationErrors()
   e.append('email', await emailExists(user.email))
   e.append('nickname', await nicknameExists(user.profile.nickname))

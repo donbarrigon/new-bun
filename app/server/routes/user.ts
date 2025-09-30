@@ -1,5 +1,5 @@
-import { userLogin, userSingup, userStore } from '../app/controllers/user'
-import { get, post, prefix } from '../app/utils/routes/routes'
+import { userLogin, userSingup, userStore } from '../controllers/user'
+import { get, post, prefix } from '../../utils/router/router'
 
 export function userRoutes() {
   get('/user/login', userLogin, 'user.login')

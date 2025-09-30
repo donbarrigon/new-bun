@@ -7,7 +7,7 @@ export type User = {
 }
 
 const client = new MongoClient(config.dbConectionString)
-console.log('👋 Conexión MongoDB establecida')
+console.log(`${config.workerTag}✅ Conexión MongoDB establecida`)
 
 async function test() {
   try {
@@ -24,7 +24,7 @@ async function test() {
 
 export async function connectDB() {
   await client.connect()
-  console.log('👋 Conexión MongoDB establecida')
+  console.log(`${config.workerTag}✅ Conexión MongoDB establecida`)
 }
 
 export function db() {
@@ -38,7 +38,7 @@ export function dbc(name: string) {
 export async function closeDB(): Promise<void> {
   if (client) {
     await client.close()
-    console.log('👋 Conexión MongoDB cerrada')
+    console.log(`${config.workerTag}📵 Conexión MongoDB cerrada`)
   }
 }
 
