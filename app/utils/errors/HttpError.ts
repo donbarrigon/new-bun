@@ -310,6 +310,10 @@ export class HttpError extends Error {
     return new HttpError(415, error)
   }
 
+  static sessionExpired(error: any = 'Sesión expirada') {
+    return new HttpError(419, error)
+  }
+
   static unprocessableEntity(error: any = 'Entidad no procesable') {
     return new HttpError(422, error)
   }
