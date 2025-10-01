@@ -1,306 +1,393 @@
-import { MongoServerError } from 'mongodb'
-
-interface Props {
-  status?: number
-  message?: string
-  error?: any
-}
+import { MongoAWSError, MongoDriverError, MongoServerError } from 'mongodb'
 
 export class HttpError extends Error {
-  public status: number
-  public error: any
+  private status: number
+  private error: any
 
-  constructor({ status = 500, message = 'Algo salió mal', error = null }: Props) {
-    super(message)
+  constructor(status = 500, error = 'Algo salió mal') {
+    super(String(error))
     this.status = status
-    this.error = error
+    this.error = errorData(error)
 
     Object.setPrototypeOf(this, new.target.prototype)
     this.name = this.constructor.name
   }
 
-  static response(e: any): Response {
-    if (e instanceof HttpError) {
-      return Response.json(
-        {
-          message: e.message,
-          error: e.error,
-        },
-        { status: e.status }
-      )
+  public json(init?: ResponseInit): Response {
+    if (init) {
+      return new Response(this.error, { status: this.status, ...init })
+    }
+    return Response.json(this.error, { status: this.status })
+  }
+
+  static mongoError(e: any): HttpError {
+    if (!e) return HttpError.internal('Error desconocido de la base de datos')
+
+    // --- 1. Errores de duplicidad ---
+    if (e.code === 11000 || e.code === 11001) {
+      if (config.appDebug) {
+        return HttpError.conflict({
+          message: 'Registro duplicado',
+          error: errorData(e),
+        })
+      }
+      return HttpError.conflict('Registro duplicado')
     }
 
-    if (e instanceof MongoServerError) {
-      const m = mongoError(e)
-      return Response.json(
-        {
-          message: m.message,
-          error: m.error,
-        },
-        { status: m.status }
-      )
+    // --- 2. Error de validación de esquema ---
+    if (e.code === 121) {
+      if (config.appDebug) {
+        return HttpError.badRequest({
+          message: 'Documento no válido según el esquema',
+          error: errorData(e),
+        })
+      }
+      return HttpError.badRequest('Documento no válido según el esquema')
     }
 
-    const er = HttpError.internal(e)
-    return Response.json(
-      {
-        message: er.message,
-        error: er.error,
-      },
-      { status: er.status }
-    )
-  }
+    // --- 3. Document too large ---
+    if (e.code === 10334) {
+      if (config.appDebug) {
+        return HttpError.payloadTooLarge({
+          message: 'Documento demasiado grande',
+          error: errorData(e),
+        })
+      }
+      return HttpError.payloadTooLarge('Documento demasiado grande')
+    }
 
-  // 4xx - Errores del cliente
-  static badRequest(error?: any) {
-    return new HttpError({
-      status: 400,
-      message: 'Solicitud incorrecta',
-      error: errorData(error),
-    })
-  }
-  static unauthorized(error?: any) {
-    return new HttpError({
-      status: 401,
-      message: 'No autorizado',
-      error: errorData(error),
-    })
-  }
-  static forbidden(error?: any) {
-    return new HttpError({
-      status: 403,
-      message: 'Prohibido',
-      error: errorData(error),
-    })
-  }
-  static notFound(error?: any) {
-    return new HttpError({
-      status: 404,
-      message: 'No encontrado',
-      error: errorData(error),
-    })
-  }
-  static methodNotAllowed(error?: any) {
-    return new HttpError({
-      status: 405,
-      message: 'Método no permitido',
-      error: errorData(error),
-    })
-  }
-  static notAcceptable(error?: any) {
-    return new HttpError({
-      status: 406,
-      message: 'No aceptable',
-      error: errorData(error),
-    })
-  }
-  static requestTimeout(error?: any) {
-    return new HttpError({
-      status: 408,
-      message: 'Tiempo de solicitud agotado',
-      error: errorData(error),
-    })
-  }
-  static conflict(error?: any) {
-    return new HttpError({
-      status: 409,
-      message: 'Conflicto',
-      error: errorData(error),
-    })
-  }
-  static gone(error?: any) {
-    return new HttpError({
-      status: 410,
-      message: 'Recurso eliminado',
-      error: errorData(error),
-    })
-  }
-  static lengthRequired(error?: any) {
-    return new HttpError({
-      status: 411,
-      message: 'Longitud requerida',
-      error: errorData(error),
-    })
-  }
-  static payloadTooLarge(error?: any) {
-    return new HttpError({
-      status: 413,
-      message: 'Carga demasiado grande',
-      error: errorData(error),
-    })
-  }
-  static unsupportedMediaType(error?: any) {
-    return new HttpError({
-      status: 415,
-      message: 'Tipo de medio no soportado',
-      error: errorData(error),
-    })
-  }
-  static unprocessableEntity(error?: any) {
-    return new HttpError({
-      status: 422,
-      message: 'Entidad no procesable',
-      error: errorData(error),
-    })
-  }
-  static tooManyRequests(error?: any) {
-    return new HttpError({
-      status: 429,
-      message: 'Demasiadas solicitudes',
-      error: errorData(error),
-    })
-  }
+    // --- 4. Write concern errors ---
+    if (e.code === 64 || e.code === 65 || e.code === 91 || e.code === 100) {
+      if (config.appDebug) {
+        return HttpError.serviceUnavailable({
+          message: 'Error de escritura en la base de datos',
+          error: errorData(e),
+        })
+      }
+      return HttpError.serviceUnavailable('Error de escritura en la base de datos')
+    }
 
-  // 5xx - Errores del servidor
-  static internal(error?: any) {
-    return new HttpError({
-      status: 500,
-      message: 'Error interno del servidor',
-      error: errorData(error),
-    })
-  }
-  static notImplemented(error?: any) {
-    return new HttpError({
-      status: 501,
-      message: 'No implementado',
-      error: errorData(error),
-    })
-  }
-  static badGateway(error?: any) {
-    return new HttpError({
-      status: 502,
-      message: 'Puerta de enlace incorrecta',
-      error: errorData(error),
-    })
-  }
-  static serviceUnavailable(error?: any) {
-    return new HttpError({
-      status: 503,
-      message: 'Servicio no disponible',
-      error: errorData(error),
-    })
-  }
-  static gatewayTimeout(error?: any) {
-    return new HttpError({
-      status: 504,
-      message: 'Tiempo de espera de la puerta de enlace agotado',
-      error: errorData(error),
-    })
-  }
-  static httpVersionNotSupported(error?: any) {
-    return new HttpError({
-      status: 505,
-      message: 'Versión HTTP no soportada',
-      error: errorData(error),
-    })
-  }
-}
+    // --- 5. Errores de transacciones ---
+    if (e.code === 251 || e.code === 244 || e.code === 112) {
+      if (config.appDebug) {
+        return HttpError.conflict({
+          message: 'Error de transacción',
+          error: errorData(e),
+        })
+      }
+      return HttpError.conflict('Error de transacción')
+    }
 
-/**
- * Convierte errores de MongoDB a HttpError según su código o tipo
- * @param err Error recibido en el catch
- * @return HttpError correspondiente
- */
-export function mongoError(e: any): HttpError {
-  if (!e) return HttpError.internal('Error desconocido de la base de datos')
+    // --- 6. Namespace no existe ---
+    if (e.code === 26) {
+      if (config.appDebug) {
+        return HttpError.notFound({
+          message: 'Colección o base de datos no existe',
+          error: errorData(e),
+        })
+      }
+      return HttpError.notFound('Colección o base de datos no existe')
+    }
 
-  // --- 1. Errores de duplicidad ---
-  // Violación de índice único o compuesto
-  if (e.code === 11000 || e.code === 11001) {
-    return HttpError.conflict({
-      message: 'Registro duplicado',
-      error: e.keyValue || e,
-    })
-  }
+    // --- 7. Cursor no encontrado ---
+    if (e.code === 43) {
+      if (config.appDebug) {
+        return HttpError.badRequest({
+          message: 'Cursor expirado o no válido',
+          error: errorData(e),
+        })
+      }
+      return HttpError.badRequest('Cursor expirado o no válido')
+    }
 
-  // --- 2. Error de validación de esquema ---
-  if (e.code === 121) {
-    return HttpError.badRequest({
-      message: 'Documento no válido según el esquema',
-      error: e.errmsg || e,
-    })
-  }
+    // --- 8. Operación interrumpida ---
+    if (e.code === 11601 || e.code === 11602) {
+      if (config.appDebug) {
+        return HttpError.requestTimeout({
+          message: 'Operación interrumpida',
+          error: errorData(e),
+        })
+      }
+      return HttpError.requestTimeout('Operación interrumpida')
+    }
 
-  // --- 3. Document too large ---
-  if (e.code === 10334) {
-    return HttpError.payloadTooLarge({
-      message: 'Documento demasiado grande',
-      error: e.errmsg || e,
-    })
-  }
+    // --- 9. MaxTimeMSExpired ---
+    if (e.code === 50) {
+      if (config.appDebug) {
+        return HttpError.requestTimeout({
+          message: 'Tiempo máximo de ejecución excedido',
+          error: errorData(e),
+        })
+      }
+      return HttpError.requestTimeout('Tiempo máximo de ejecución excedido')
+    }
 
-  // --- 4. Write concern errors ---
-  if (e.code === 64 || e.code === 65 || e.code === 91) {
-    return HttpError.serviceUnavailable({
-      message: 'Error de escritura en la base de datos',
-      error: e,
-    })
-  }
+    // --- 10. Errores de conexión ---
+    if (e.name === 'MongoNetworkError' || e.name === 'MongoTimeoutError') {
+      if (config.appDebug) {
+        return HttpError.serviceUnavailable(errorData(e))
+      }
+      return HttpError.serviceUnavailable('Error de conexión con la base de datos')
+    }
 
-  // --- 5. Errores de conexión ---
-  if (e.name === 'MongoNetworkError' || e.name === 'MongoTimeoutError') {
-    return HttpError.serviceUnavailable(e)
-  }
+    // --- 11. Errores de tipo BSON ---
+    if (e.name === 'BSONTypeError' || e.name === 'BSONError') {
+      if (config.appDebug) {
+        return HttpError.unprocessableEntity({
+          message: 'Tipo de dato no válido',
+          error: errorData(e),
+        })
+      }
+      return HttpError.unprocessableEntity('Tipo de dato no válido')
+    }
 
-  // --- 6. Errores de tipo BSON ---
-  if (e.name === 'BSONTypeError') {
-    return HttpError.unprocessableEntity({
-      message: 'Tipo de dato no válido',
-      error: e.message,
-    })
-  }
+    // --- 12. Operación en nodo no primario ---
+    if (
+      e.code === 10058 ||
+      e.code === 13436 ||
+      e.message?.includes('not master') ||
+      e.message?.includes('not primary')
+    ) {
+      if (config.appDebug) {
+        return HttpError.serviceUnavailable({
+          message: 'Intento de escritura en un nodo secundario',
+          error: errorData(e),
+        })
+      }
+      return HttpError.serviceUnavailable('Intento de escritura en un nodo secundario')
+    }
 
-  // --- 7. Operación en nodo no primario ---
-  if (e.code === 10058 || e.message?.includes('not master')) {
-    return HttpError.serviceUnavailable({
-      message: 'Intento de escritura en un nodo secundario',
-      error: e,
-    })
-  }
+    // --- 13. Errores de autenticación/autorización ---
+    if (e.code === 13 || e.code === 18) {
+      if (config.appDebug) {
+        return HttpError.unauthorized({
+          message: 'No autorizado',
+          error: errorData(e),
+        })
+      }
+      return HttpError.unauthorized('No autorizado')
+    }
 
-  // --- 8. Errores de autenticación/autorización ---
-  if (e.code === 13) {
-    return HttpError.unauthorized({
-      message: 'No autorizado',
-      error: e,
-    })
-  }
+    if (e.code === 8000 || e.code === 31) {
+      if (config.appDebug) {
+        return HttpError.forbidden({
+          message: 'Operación prohibida',
+          error: errorData(e),
+        })
+      }
+      return HttpError.forbidden('Operación prohibida')
+    }
 
-  if (e.code === 8000) {
-    return HttpError.forbidden({
-      message: 'Operación prohibida',
-      error: e,
-    })
-  }
+    // --- 14. Error de índice inexistente ---
+    if (e.code === 27 || e.code === 85) {
+      if (config.appDebug) {
+        return HttpError.badRequest({
+          message: 'Índice no existe',
+          error: errorData(e),
+        })
+      }
+      return HttpError.badRequest('Índice no existe')
+    }
 
-  // --- 9. Error de índice inexistente ---
-  if (e.code === 27) {
-    return HttpError.badRequest({
-      message: 'Índice no existe',
-      error: e,
-    })
-  }
+    // --- 15. Comando desconocido ---
+    if (e.code === 59) {
+      if (config.appDebug) {
+        return HttpError.badRequest({
+          message: 'Comando no reconocido',
+          error: errorData(e),
+        })
+      }
+      return HttpError.badRequest('Comando no reconocido')
+    }
 
-  // --- 10. Errores generales de servidor Mongo ---
-  if (e.name === 'MongoServerError' || e.name === 'MongoError') {
-    return HttpError.internal(e)
-  }
+    // --- 16. Límite de memoria excedido ---
+    if (e.code === 292) {
+      if (config.appDebug) {
+        return HttpError.serviceUnavailable({
+          message: 'Límite de memoria excedido',
+          error: errorData(e),
+        })
+      }
+      return HttpError.serviceUnavailable('Límite de memoria excedido')
+    }
 
-  // --- 11. Fallback ---
-  return HttpError.internal(e)
-}
+    // --- 17. Errores de tipo MongoParseError ---
+    if (e.name === 'MongoParseError') {
+      if (config.appDebug) {
+        return HttpError.badRequest({
+          message: 'Error al parsear la conexión o consulta',
+          error: errorData(e),
+        })
+      }
+      return HttpError.badRequest('Error al parsear la conexión o consulta')
+    }
 
-// Función privada del módulo para manejar errores
-function errorData(error?: any) {
-  if (!error) return null
-  if (error instanceof Error) {
+    // --- 18. Errores de MongoDB Atlas/AWS ---
+    if (e instanceof MongoAWSError) {
+      if (config.appDebug) {
+        return HttpError.serviceUnavailable({
+          message: 'Error de autenticación AWS',
+          error: errorData(e),
+        })
+      }
+      return HttpError.serviceUnavailable('Error de autenticación AWS')
+    }
+
+    // --- 19. Errores de TopologyDestroyed ---
+    if (e.name === 'MongoTopologyClosedError') {
+      if (config.appDebug) {
+        return HttpError.serviceUnavailable({
+          message: 'Conexión a la base de datos cerrada',
+          error: errorData(e),
+        })
+      }
+      return HttpError.serviceUnavailable('Conexión a la base de datos cerrada')
+    }
+
+    // --- 20. Errores generales de servidor Mongo ---
+    if (e.name === 'MongoServerError' || e.name === 'MongoError') {
+      if (config.appDebug) {
+        return HttpError.internal(errorData(e))
+      }
+      return HttpError.internal('Error interno del servidor de la base de datos')
+    }
+
+    // --- 21. Fallback ---
     if (config.appDebug) {
-      return error.message
+      return HttpError.internal(errorData(e))
     }
-    return {
-      message: error.message,
-      stack: error.stack, // modo producción: mensaje + stack
-    }
+    return HttpError.internal('Error interno de la base de datos')
   }
-  return error // cualquier otro tipo se devuelve tal cual
+
+  // ================================================================
+  // 4xx - Errores del cliente
+  // ================================================================
+  static badRequest(error: any = 'Solicitud incorrecta') {
+    return new HttpError(400, error)
+  }
+
+  static unauthorized(error: any = 'No autorizado') {
+    return new HttpError(401, error)
+  }
+
+  static forbidden(error: any = 'Prohibido') {
+    return new HttpError(403, error)
+  }
+
+  static notFound(error: any = 'No encontrado') {
+    return new HttpError(404, error)
+  }
+
+  static methodNotAllowed(error: any = 'Método no permitido') {
+    return new HttpError(405, error)
+  }
+
+  static notAcceptable(error: any = 'No aceptable') {
+    return new HttpError(406, error)
+  }
+
+  static requestTimeout(error: any = 'Tiempo de solicitud agotado') {
+    return new HttpError(408, error)
+  }
+
+  static conflict(error: any = 'Conflicto') {
+    return new HttpError(409, error)
+  }
+
+  static gone(error: any = 'Recurso eliminado') {
+    return new HttpError(410, error)
+  }
+
+  static lengthRequired(error: any = 'Longitud requerida') {
+    return new HttpError(411, error)
+  }
+
+  static payloadTooLarge(error: any = 'Carga demasiado grande') {
+    return new HttpError(413, error)
+  }
+
+  static unsupportedMediaType(error: any = 'Tipo de medio no soportado') {
+    return new HttpError(415, error)
+  }
+
+  static unprocessableEntity(error: any = 'Entidad no procesable') {
+    return new HttpError(422, error)
+  }
+
+  static tooManyRequests(error: any = 'Demasiadas solicitudes') {
+    return new HttpError(429, error)
+  }
+
+  // ================================================================
+  // 5xx - Errores del servidor
+  // ================================================================
+  static internal(error: any = 'Error interno del servidor') {
+    return new HttpError(500, error)
+  }
+
+  static notImplemented(error: any = 'No implementado') {
+    return new HttpError(501, error)
+  }
+
+  static badGateway(error: any = 'Puerta de enlace incorrecta') {
+    return new HttpError(502, error)
+  }
+
+  static serviceUnavailable(error: any = 'Servicio no disponible') {
+    return new HttpError(503, error)
+  }
+
+  static gatewayTimeout(error: any = 'Tiempo de espera de la puerta de enlace agotado') {
+    return new HttpError(504, error)
+  }
+
+  static httpVersionNotSupported(error: any = 'Versión HTTP no soportada') {
+    return new HttpError(505, error)
+  }
+}
+
+function errorData(e: any) {
+  if (typeof e === 'string') {
+    return { message: e }
+  }
+
+  if (e instanceof Error) {
+    if (config.appDebug) {
+      const result: any = {}
+
+      // 1. Obtener propiedades propias (tu código actual)
+      const ownKeys = Object.getOwnPropertyNames(e)
+      for (const key of ownKeys) {
+        try {
+          result[key] = (e as any)[key]
+        } catch {
+          result[key] = '[Error al acceder]'
+        }
+      }
+
+      // 2. Obtener propiedades del prototipo (heredadas)
+      let proto = Object.getPrototypeOf(e)
+      while (proto && proto !== Object.prototype && proto !== Error.prototype) {
+        const protoKeys = Object.getOwnPropertyNames(proto)
+        for (const key of protoKeys) {
+          if (!result[key] && key !== 'constructor') {
+            try {
+              result[key] = (e as any)[key]
+            } catch {
+              result[key] = '[Error al acceder]'
+            }
+          }
+        }
+        proto = Object.getPrototypeOf(proto)
+      }
+
+      // 3. Agregar información adicional útil
+      result._className = e.constructor.name
+
+      return result
+    }
+    return { message: e.message }
+  }
+
+  return e
 }

@@ -1,6 +1,7 @@
 import { HttpError } from './HttpError.ts'
 export class ValidationErrors {
-  errors: Record<string, string[]> = {}
+  private errors: Record<string, string[]> = {}
+
   constructor(errors: Record<string, string[]> = {}) {
     this.errors = errors
   }
@@ -11,7 +12,7 @@ export class ValidationErrors {
     }
   }
 
-  hasRepositoryErrors(): void {
+  hasEntityErrors(): void {
     for (const _ in this.errors) {
       throw HttpError.unprocessableEntity(this.errors)
     }
