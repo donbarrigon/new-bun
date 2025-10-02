@@ -1,4 +1,9 @@
-export function toNameCase(name: string): string {
+/**
+ *
+ * @param {string} name
+ * @returns {string}
+ */
+export function toNameCase(name) {
   const lowercaseWords = new Set(['de', 'del', 'la', 'las', 'los', 'y', 'en', 'el', 'a', 'un', 'una'])
 
   return name

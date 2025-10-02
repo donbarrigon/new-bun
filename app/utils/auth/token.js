@@ -1,4 +1,8 @@
-export function newToken(): string {
+/**
+ * Genera un nuevo token aleatorio de 32 caracteres hex
+ * @returns {string}
+ */
+export function newToken() {
   const bytes = new Uint8Array(16) // 16 bytes = 32 caracteres hex
   crypto.getRandomValues(bytes)
   return Array.from(bytes)

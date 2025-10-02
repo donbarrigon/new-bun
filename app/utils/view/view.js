@@ -1,4 +1,9 @@
-export function view(html: string): Response {
+/**
+ *
+ * @param {string} html - Cadena de HTML
+ * @returns {Response} Respuesta HTTP
+ */
+export function view(html) {
   return new Response(
     html
       .replace(/<!--.*?-->/gs, '') // elimina comentarios

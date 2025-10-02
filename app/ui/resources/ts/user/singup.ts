@@ -1,5 +1,5 @@
 import { isEmail, isName, isNickname, isPassword, isPhoneNumber } from '../../../../utils/validations/fields'
-import { post } from '../../../../utils/fetch/api'
+import { post } from '../../../../utils/fetch/msgpack'
 
 // ==== Referencias de inputs y labels ====
 
