@@ -1,13 +1,14 @@
+import { encode } from '@msgpack/msgpack'
 import { MongoAWSError, MongoDriverError, MongoServerError } from 'mongodb'
 
 export class HttpError extends Error {
   private status: number
   private error: any
 
-  constructor(status = 500, error = 'Algo salió mal') {
+  constructor(status = 500, error: any = 'Algo salió mal') {
     super(String(error))
     this.status = status
-    this.error = errorData(error)
+    this.error = error
 
     Object.setPrototypeOf(this, new.target.prototype)
     this.name = this.constructor.name
@@ -20,125 +21,86 @@ export class HttpError extends Error {
     return Response.json(this.error, { status: this.status })
   }
 
-  static mongoError(e: any): HttpError {
+  public msgpack(init?: ResponseInit): Response {
+    const body = encode(this.error)
+    if (init) {
+      return new Response(body as BodyInit, {
+        status: this.status,
+        headers: {
+          'Content-Type': 'application/msgpack',
+          ...init.headers,
+        },
+        ...init,
+      })
+    }
+
+    return new Response(body as BodyInit, {
+      status: this.status,
+      headers: {
+        'Content-Type': 'application/msgpack',
+      },
+    })
+  }
+
+  // ================================================================
+  // Errores de mongodb
+  // ================================================================
+  public static mongo(e: any): HttpError {
     if (!e) return HttpError.internal('Error desconocido de la base de datos')
 
     // --- 1. Errores de duplicidad ---
     if (e.code === 11000 || e.code === 11001) {
-      if (config.appDebug) {
-        return HttpError.conflict({
-          message: 'Registro duplicado',
-          error: errorData(e),
-        })
-      }
-      return HttpError.conflict('Registro duplicado')
+      return HttpError.conflict(e, 'Registro duplicado')
     }
 
     // --- 2. Error de validación de esquema ---
     if (e.code === 121) {
-      if (config.appDebug) {
-        return HttpError.badRequest({
-          message: 'Documento no válido según el esquema',
-          error: errorData(e),
-        })
-      }
-      return HttpError.badRequest('Documento no válido según el esquema')
+      return HttpError.badRequest(e, 'Documento no válido según el esquema')
     }
 
     // --- 3. Document too large ---
     if (e.code === 10334) {
-      if (config.appDebug) {
-        return HttpError.payloadTooLarge({
-          message: 'Documento demasiado grande',
-          error: errorData(e),
-        })
-      }
-      return HttpError.payloadTooLarge('Documento demasiado grande')
+      return HttpError.payloadTooLarge(e, 'Documento demasiado grande')
     }
 
     // --- 4. Write concern errors ---
     if (e.code === 64 || e.code === 65 || e.code === 91 || e.code === 100) {
-      if (config.appDebug) {
-        return HttpError.serviceUnavailable({
-          message: 'Error de escritura en la base de datos',
-          error: errorData(e),
-        })
-      }
-      return HttpError.serviceUnavailable('Error de escritura en la base de datos')
+      return HttpError.serviceUnavailable(e, 'Error de escritura en la base de datos')
     }
 
     // --- 5. Errores de transacciones ---
     if (e.code === 251 || e.code === 244 || e.code === 112) {
-      if (config.appDebug) {
-        return HttpError.conflict({
-          message: 'Error de transacción',
-          error: errorData(e),
-        })
-      }
-      return HttpError.conflict('Error de transacción')
+      return HttpError.conflict(e, 'Error de transacción')
     }
 
     // --- 6. Namespace no existe ---
     if (e.code === 26) {
-      if (config.appDebug) {
-        return HttpError.notFound({
-          message: 'Colección o base de datos no existe',
-          error: errorData(e),
-        })
-      }
-      return HttpError.notFound('Colección o base de datos no existe')
+      return HttpError.notFound(e, 'Colección o base de datos no existe')
     }
 
     // --- 7. Cursor no encontrado ---
     if (e.code === 43) {
-      if (config.appDebug) {
-        return HttpError.badRequest({
-          message: 'Cursor expirado o no válido',
-          error: errorData(e),
-        })
-      }
-      return HttpError.badRequest('Cursor expirado o no válido')
+      return HttpError.badRequest(e, 'Cursor expirado o no válido')
     }
 
     // --- 8. Operación interrumpida ---
     if (e.code === 11601 || e.code === 11602) {
-      if (config.appDebug) {
-        return HttpError.requestTimeout({
-          message: 'Operación interrumpida',
-          error: errorData(e),
-        })
-      }
-      return HttpError.requestTimeout('Operación interrumpida')
+      return HttpError.requestTimeout(e, 'Operación interrumpida')
     }
 
     // --- 9. MaxTimeMSExpired ---
     if (e.code === 50) {
-      if (config.appDebug) {
-        return HttpError.requestTimeout({
-          message: 'Tiempo máximo de ejecución excedido',
-          error: errorData(e),
-        })
-      }
-      return HttpError.requestTimeout('Tiempo máximo de ejecución excedido')
+      return HttpError.requestTimeout(e, 'Tiempo máximo de ejecución excedido')
     }
 
     // --- 10. Errores de conexión ---
     if (e.name === 'MongoNetworkError' || e.name === 'MongoTimeoutError') {
-      if (config.appDebug) {
-        return HttpError.serviceUnavailable(errorData(e))
-      }
-      return HttpError.serviceUnavailable('Error de conexión con la base de datos')
+      return HttpError.serviceUnavailable(e, 'Error de conexión con la base de datos')
     }
 
     // --- 11. Errores de tipo BSON ---
     if (e.name === 'BSONTypeError' || e.name === 'BSONError') {
-      if (config.appDebug) {
-        return HttpError.unprocessableEntity({
-          message: 'Tipo de dato no válido',
-          error: errorData(e),
-        })
-      }
-      return HttpError.unprocessableEntity('Tipo de dato no válido')
+      return HttpError.unprocessableEntity(e, 'Tipo de dato no válido')
     }
 
     // --- 12. Operación en nodo no primario ---
@@ -148,209 +110,148 @@ export class HttpError extends Error {
       e.message?.includes('not master') ||
       e.message?.includes('not primary')
     ) {
-      if (config.appDebug) {
-        return HttpError.serviceUnavailable({
-          message: 'Intento de escritura en un nodo secundario',
-          error: errorData(e),
-        })
-      }
-      return HttpError.serviceUnavailable('Intento de escritura en un nodo secundario')
+      return HttpError.serviceUnavailable(e, 'Intento de escritura en un nodo secundario')
     }
 
     // --- 13. Errores de autenticación/autorización ---
     if (e.code === 13 || e.code === 18) {
-      if (config.appDebug) {
-        return HttpError.unauthorized({
-          message: 'No autorizado',
-          error: errorData(e),
-        })
-      }
-      return HttpError.unauthorized('No autorizado')
+      return HttpError.unauthorized(e, 'No autorizado')
     }
 
     if (e.code === 8000 || e.code === 31) {
-      if (config.appDebug) {
-        return HttpError.forbidden({
-          message: 'Operación prohibida',
-          error: errorData(e),
-        })
-      }
-      return HttpError.forbidden('Operación prohibida')
+      return HttpError.forbidden(e, 'Operación prohibida')
     }
 
     // --- 14. Error de índice inexistente ---
     if (e.code === 27 || e.code === 85) {
-      if (config.appDebug) {
-        return HttpError.badRequest({
-          message: 'Índice no existe',
-          error: errorData(e),
-        })
-      }
-      return HttpError.badRequest('Índice no existe')
+      return HttpError.badRequest(e, 'Índice no existe')
     }
 
     // --- 15. Comando desconocido ---
     if (e.code === 59) {
-      if (config.appDebug) {
-        return HttpError.badRequest({
-          message: 'Comando no reconocido',
-          error: errorData(e),
-        })
-      }
-      return HttpError.badRequest('Comando no reconocido')
+      return HttpError.badRequest(e, 'Comando no reconocido')
     }
 
     // --- 16. Límite de memoria excedido ---
     if (e.code === 292) {
-      if (config.appDebug) {
-        return HttpError.serviceUnavailable({
-          message: 'Límite de memoria excedido',
-          error: errorData(e),
-        })
-      }
-      return HttpError.serviceUnavailable('Límite de memoria excedido')
+      return HttpError.serviceUnavailable(e, 'Límite de memoria excedido')
     }
 
     // --- 17. Errores de tipo MongoParseError ---
     if (e.name === 'MongoParseError') {
-      if (config.appDebug) {
-        return HttpError.badRequest({
-          message: 'Error al parsear la conexión o consulta',
-          error: errorData(e),
-        })
-      }
-      return HttpError.badRequest('Error al parsear la conexión o consulta')
+      return HttpError.badRequest(e, 'Error al parsear la conexión o consulta')
     }
 
     // --- 18. Errores de MongoDB Atlas/AWS ---
     if (e instanceof MongoAWSError) {
-      if (config.appDebug) {
-        return HttpError.serviceUnavailable({
-          message: 'Error de autenticación AWS',
-          error: errorData(e),
-        })
-      }
-      return HttpError.serviceUnavailable('Error de autenticación AWS')
+      return HttpError.serviceUnavailable(e, 'Error de autenticación AWS')
     }
 
     // --- 19. Errores de TopologyDestroyed ---
     if (e.name === 'MongoTopologyClosedError') {
-      if (config.appDebug) {
-        return HttpError.serviceUnavailable({
-          message: 'Conexión a la base de datos cerrada',
-          error: errorData(e),
-        })
-      }
-      return HttpError.serviceUnavailable('Conexión a la base de datos cerrada')
+      return HttpError.serviceUnavailable(e, 'Conexión a la base de datos cerrada')
     }
 
     // --- 20. Errores generales de servidor Mongo ---
     if (e.name === 'MongoServerError' || e.name === 'MongoError') {
-      if (config.appDebug) {
-        return HttpError.internal(errorData(e))
-      }
-      return HttpError.internal('Error interno del servidor de la base de datos')
+      return HttpError.internal(e, 'Error interno del servidor de la base de datos')
     }
 
     // --- 21. Fallback ---
-    if (config.appDebug) {
-      return HttpError.internal(errorData(e))
-    }
-    return HttpError.internal('Error interno de la base de datos')
+    return HttpError.internal(e, 'Error interno de la base de datos')
   }
-
   // ================================================================
   // 4xx - Errores del cliente
   // ================================================================
-  static badRequest(error: any = 'Solicitud incorrecta') {
-    return new HttpError(400, error)
+  public static badRequest(error: any = 'Solicitud incorrecta', message?: any) {
+    return new HttpError(400, errorData(error, message))
   }
 
-  static unauthorized(error: any = 'No autorizado') {
-    return new HttpError(401, error)
+  public static unauthorized(error: any = 'No autorizado', message?: any) {
+    return new HttpError(401, errorData(error, message))
   }
 
-  static forbidden(error: any = 'Prohibido') {
-    return new HttpError(403, error)
+  public static forbidden(error: any = 'Prohibido', message?: any) {
+    return new HttpError(403, errorData(error, message))
   }
 
-  static notFound(error: any = 'No encontrado') {
-    return new HttpError(404, error)
+  public static notFound(error: any = 'No encontrado', message?: any) {
+    return new HttpError(404, errorData(error, message))
   }
 
-  static methodNotAllowed(error: any = 'Método no permitido') {
-    return new HttpError(405, error)
+  public static methodNotAllowed(error: any = 'Método no permitido', message?: any) {
+    return new HttpError(405, errorData(error, message))
   }
 
-  static notAcceptable(error: any = 'No aceptable') {
-    return new HttpError(406, error)
+  public static notAcceptable(error: any = 'No aceptable', message?: any) {
+    return new HttpError(406, errorData(error, message))
   }
 
-  static requestTimeout(error: any = 'Tiempo de solicitud agotado') {
-    return new HttpError(408, error)
+  public static requestTimeout(error: any = 'Tiempo de solicitud agotado', message?: any) {
+    return new HttpError(408, errorData(error, message))
   }
 
-  static conflict(error: any = 'Conflicto') {
-    return new HttpError(409, error)
+  public static conflict(error: any = 'Conflicto', message?: any) {
+    return new HttpError(409, errorData(error, message))
   }
 
-  static gone(error: any = 'Recurso eliminado') {
-    return new HttpError(410, error)
+  public static gone(error: any = 'Recurso eliminado', message?: any) {
+    return new HttpError(410, errorData(error, message))
   }
 
-  static lengthRequired(error: any = 'Longitud requerida') {
-    return new HttpError(411, error)
+  public static lengthRequired(error: any = 'Longitud requerida', message?: any) {
+    return new HttpError(411, errorData(error, message))
   }
 
-  static payloadTooLarge(error: any = 'Carga demasiado grande') {
-    return new HttpError(413, error)
+  public static payloadTooLarge(error: any = 'Carga demasiado grande', message?: any) {
+    return new HttpError(413, errorData(error, message))
   }
 
-  static unsupportedMediaType(error: any = 'Tipo de medio no soportado') {
-    return new HttpError(415, error)
+  public static unsupportedMediaType(error: any = 'Tipo de medio no soportado', message?: any) {
+    return new HttpError(415, errorData(error, message))
   }
 
-  static sessionExpired(error: any = 'Sesión expirada') {
-    return new HttpError(419, error)
+  public static sessionExpired(error: any = 'Sesión expirada', message?: any) {
+    return new HttpError(419, errorData(error, message))
   }
 
-  static unprocessableEntity(error: any = 'Entidad no procesable') {
-    return new HttpError(422, error)
+  public static unprocessableEntity(error: any = 'Entidad no procesable', message?: any) {
+    return new HttpError(422, errorData(error, message))
   }
 
-  static tooManyRequests(error: any = 'Demasiadas solicitudes') {
-    return new HttpError(429, error)
+  public static tooManyRequests(error: any = 'Demasiadas solicitudes', message?: any) {
+    return new HttpError(429, errorData(error, message))
   }
 
   // ================================================================
   // 5xx - Errores del servidor
   // ================================================================
-  static internal(error: any = 'Error interno del servidor') {
-    return new HttpError(500, error)
+  public static internal(error: any = 'Error interno del servidor', message?: any) {
+    return new HttpError(500, errorData(error, message))
   }
 
-  static notImplemented(error: any = 'No implementado') {
-    return new HttpError(501, error)
+  public static notImplemented(error: any = 'No implementado', message?: any) {
+    return new HttpError(501, errorData(error, message))
   }
 
-  static badGateway(error: any = 'Puerta de enlace incorrecta') {
-    return new HttpError(502, error)
+  public static badGateway(error: any = 'Puerta de enlace incorrecta', message?: any) {
+    return new HttpError(502, errorData(error, message))
   }
 
-  static serviceUnavailable(error: any = 'Servicio no disponible') {
-    return new HttpError(503, error)
+  public static serviceUnavailable(error: any = 'Servicio no disponible', message?: any) {
+    return new HttpError(503, errorData(error, message))
   }
 
-  static gatewayTimeout(error: any = 'Tiempo de espera de la puerta de enlace agotado') {
-    return new HttpError(504, error)
+  public static gatewayTimeout(error: any = 'Tiempo de espera de la puerta de enlace agotado', message?: any) {
+    return new HttpError(504, errorData(error, message))
   }
 
-  static httpVersionNotSupported(error: any = 'Versión HTTP no soportada') {
-    return new HttpError(505, error)
+  public static httpVersionNotSupported(error: any = 'Versión HTTP no soportada', message?: any) {
+    return new HttpError(505, errorData(error, message))
   }
 }
 
-function errorData(e: any) {
+function errorData(e: any, msg?: string) {
   if (typeof e === 'string') {
     return { message: e }
   }
@@ -384,14 +285,21 @@ function errorData(e: any) {
         }
         proto = Object.getPrototypeOf(proto)
       }
-
       // 3. Agregar información adicional útil
       result._className = e.constructor.name
 
+      if (msg) {
+        return {
+          message: msg,
+          error: result,
+        }
+      }
       return result
+    }
+    if (msg) {
+      return { message: msg }
     }
     return { message: e.message }
   }
-
   return e
 }
