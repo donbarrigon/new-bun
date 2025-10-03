@@ -329,4 +329,36 @@ export class Session {
     const fileName = id.slice(3)
     return `tmp/sessions/index/${dir}/${fileName}`
   }
+
+  /**
+   * verifica si la session posee el permiso
+   * @param {string} permission
+   * @returns {boolean}
+   */
+  can(permission) {
+    return this.permissions.has(permission)
+  }
+
+  /**
+   * verifica si la session posee el rol
+   * @param {string} role
+   * @returns {boolean}
+   */
+  hasRole(role) {
+    return this.roles.has(role)
+  }
+
+  /**
+   * verifica si la session posee los permisos
+   * @param {string[]} permissions
+   * @returns {boolean}
+   */
+  hasPermissions(permissions) {
+    for (const permission of permissions) {
+      if (this.permissions.has(permission)) {
+        return true
+      }
+    }
+    return false
+  }
 }

@@ -1,5 +1,5 @@
 import { ValidationErrors } from '../../../utils/errors/ValidationErrors'
-import { isEmail, isNickname, isName, isPhoneNumber, isPassword } from '../../../utils/validations/fields'
+import { isEmail, isNickname, isName, isPhoneNumber, isPassword } from '../../../utils/validations/validations'
 import { toNameCase } from '../../../utils/format/strings'
 import bcrypt from 'bcrypt'
 import type { IUser } from '../../models/User'

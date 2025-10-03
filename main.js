@@ -1,13 +1,16 @@
 import { spawn } from 'bun'
 
-const cpus = navigator.hardwareConcurrency
+let cpus = navigator.hardwareConcurrency
 const buns = new Array(cpus)
+if (cpus > 32) {
+  cpus = 32
+}
 
 console.log(`⚡⚡ Iniciando ${cpus} clusters de Bun ⚡⚡`)
 
 for (let i = 0; i < cpus; i++) {
   buns[i] = spawn({
-    cmd: ['bun', './app.ts'],
+    cmd: ['bun', './app.js'],
     env: {
       ...process.env,
       WORKER_ID: String(i + 1), // ✨ Pasar ID del worker
