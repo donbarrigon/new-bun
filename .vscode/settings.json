@@ -1,33 +1,4 @@
-// {
-//   "editor.defaultFormatter": "esbenp.prettier-vscode",
-//   "editor.formatOnSave": true,
-//   "editor.codeActionsOnSave": {
-//     "source.fixAll.eslint": "explicit"
-//   },
-//   "eslint.validate": [
-//     "javascript",
-//     "typescript"
-//   ],
-//   "[typescript]": {
-//     "editor.defaultFormatter": "esbenp.prettier-vscode"
-//   }
-// }
-
 {
-  // Prettier como formateador por defecto
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
-
-  // Formatear al guardar
-  "editor.formatOnSave": true,
-
-  // Corrección automática de ESLint al guardar
-  "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": "explicit"
-  },
-
-  // Lenguajes donde se aplica ESLint
-  "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
-
-  // Opcional: mostrar problemas de ESLint en tiempo real
-  "eslint.alwaysShowStatus": true
+  "editor.defaultFormatter": "biomejs.biome", 
+  "editor.formatOnSave": true
 }

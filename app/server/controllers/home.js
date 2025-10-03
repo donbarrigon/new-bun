@@ -3,7 +3,7 @@ export async function index() {
   return view(homePage())
 }
 
-export async function publicFiles(req: Request): Promise<Response> {
+export async function publicFiles(req){
   const url = new URL(req.url)
 
   const filePath = url.pathname.replace(/^\/public\//, '')

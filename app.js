@@ -1,6 +1,6 @@
 import "./config/config.js";
 import { appRoutes } from "./app/server/routes/routes.ts";
-import { closeDB } from "./app/server/repositories/db/mongo.ts";
+import { closeDB } from "./app/utils/db/mongo.js";
 
 const server = Bun.serve({
   port: config.serverPort,
