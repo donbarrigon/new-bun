@@ -1,11 +1,30 @@
+import { logPrint } from "../app/utils/log/log"
+
 export const env = {
   appName: Bun.env.APP_NAME ?? "MyApp",
   appDebug: Bun.env.APP_DEBUG === "true",
+
   serverPort: Number(Bun.env.SERVER_PORT ?? 3000),
   sessionLife: Number(Bun.env.SESSION_LIFE ?? 48 * 60) * 60 * 1000,
-  dbConectionString:
-    Bun.env.DB_CONNECTION_STRING ?? "mongodb://localhost:27017",
+
+  dbConectionString: Bun.env.DB_CONNECTION_STRING ?? "mongodb://localhost:27017",
   dbName: Bun.env.DB_NAME ?? "sample_mflix",
+
+  logDays: Number(Bun.env.LOG_DAYS ?? 7),
+  logPrint: Bun.env.LOG_PRINT ? Bun.env.LOG_PRINT === "true" : false,
+  logLevel:
+    {
+      emergency: 0,
+      alert: 1,
+      critical: 2,
+      error: 3,
+      warning: 4,
+      notice: 5,
+      info: 6,
+      debug: 7,
+      off: 8,
+    }[Bun.env.LOG_LEVEL?.toLowerCase()] ?? 7,
+
   workerId: Number(Bun.env.WORKER_ID ?? 0),
   workerCpus: Number(Bun.env.WORKER_CPUS ?? 1),
   workerTag: [
@@ -51,4 +70,4 @@ export const env = {
     "[🔻 w:31]", // blanco
     "[⭐ w:32]", // marrón
   ][Number(Bun.env.WORKER_ID ?? 0)],
-};
+}

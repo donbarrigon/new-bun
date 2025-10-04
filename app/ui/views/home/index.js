@@ -1,9 +1,15 @@
-import { appLayout } from '../../components/layout/app-layout'
+import { appLayout } from "../../components/layout/app-layout"
 
-interface Props {}
-export function homePage(): string {
+export function homePage() {
+  const listItem = (items) => {
+    return /*html*/ `
+      <ul>
+        ${items.map((item) => `<li>${item}</li>`).join("\n")}
+      </ul>
+    `
+  }
   return appLayout({
-    title: 'Home page',
+    title: "Home page",
     slot: /*html*/ `
       <div class="container">
         <h1>Home page</h1>
@@ -16,11 +22,7 @@ export function homePage(): string {
         <small>Texto pequeño para detalles adicionales.</small>
         
         <h3>Lista</h3>
-        <ul>
-          <li>Primer elemento</li>
-          <li>Segundo elemento</li>
-          <li>Tercer elemento</li>
-        </ul>
+          ${listItem(["Item 1", "Item 2", "Item 3"])}
         
         <h3>Formulario</h3>
         <input type="text" placeholder="Ingresa tu texto aquí">
