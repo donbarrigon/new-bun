@@ -1,4 +1,4 @@
-import { logPrint } from "../app/utils/log/log"
+import { logPrint } from "../app/utils/log/index.js"
 
 export const env = {
   appName: Bun.env.APP_NAME ?? "MyApp",

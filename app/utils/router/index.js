@@ -1,7 +1,7 @@
-import { HttpError } from '../errors/HttpError.js'
+import { HttpError } from "../errors/HttpError.js"
 
-// Controlador: función que recibe un Request y devuelve un Response
-// typedef Controller = (req: Request) => Promise<Response>
+// Controlador: función que recibe un Request, Server y devuelve un Response
+// typedef Controller = async (req: Request, server: Server) => Promise<Response>
 
 // Middleware: recibe un controlador y devuelve un controlador
 // typedef Middleware = (handler: Controller) => Controller
@@ -25,47 +25,79 @@ const routeNameMap = {}
  * @param {string} [name=''] - Nombre de la ruta (opcional)
  * @returns {void}
  */
-export const get = (path, controller, name = '') => addRoute('GET', path, controller, name)
+export const get = (path, controller, name = "") => addRoute("GET", path, controller, name)
 
 /**
  * Registra una ruta con método POST
+ * @param {string} path - Ruta a registrar
+ * @param {Function} controller - Controlador de la ruta
+ * @param {string} [name=''] - Nombre de la ruta (opcional)
+ * @returns {void}
  */
-export const post = (path, controller, name = '') => addRoute('POST', path, controller, name)
+export const post = (path, controller, name = "") => addRoute("POST", path, controller, name)
 
 /**
  * Registra una ruta con método PUT
+ * @param {string} path - Ruta a registrar
+ * @param {Function} controller - Controlador de la ruta
+ * @param {string} [name=''] - Nombre de la ruta (opcional)
+ * @returns {void}
  */
-export const put = (path, controller, name = '') => addRoute('PUT', path, controller, name)
+export const put = (path, controller, name = "") => addRoute("PUT", path, controller, name)
 
 /**
  * Registra una ruta con método PATCH
+ * @param {string} path - Ruta a registrar
+ * @param {Function} controller - Controlador de la ruta
+ * @param {string} [name=''] - Nombre de la ruta (opcional)
+ * @returns {void}
  */
-export const patch = (path, controller, name = '') => addRoute('PATCH', path, controller, name)
+export const patch = (path, controller, name = "") => addRoute("PATCH", path, controller, name)
 
 /**
  * Registra una ruta con método DELETE
+ * @param {string} path - Ruta a registrar
+ * @param {Function} controller - Controlador de la ruta
+ * @param {string} [name=''] - Nombre de la ruta (opcional)
+ * @returns {void}
  */
-export const del = (path, controller, name = '') => addRoute('DELETE', path, controller, name)
+export const del = (path, controller, name = "") => addRoute("DELETE", path, controller, name)
 
 /**
  * Registra una ruta con método HEAD
+ * @param {string} path - Ruta a registrar
+ * @param {Function} controller - Controlador de la ruta
+ * @param {string} [name=''] - Nombre de la ruta (opcional)
+ * @returns {void}
  */
-export const head = (path, controller, name = '') => addRoute('HEAD', path, controller, name)
+export const head = (path, controller, name = "") => addRoute("HEAD", path, controller, name)
 
 /**
  * Registra una ruta con método OPTIONS
+ * @param {string} path - Ruta a registrar
+ * @param {Function} controller - Controlador de la ruta
+ * @param {string} [name=''] - Nombre de la ruta (opcional)
+ * @returns {void}
  */
-export const options = (path, controller, name = '') => addRoute('OPTIONS', path, controller, name)
+export const options = (path, controller, name = "") => addRoute("OPTIONS", path, controller, name)
 
 /**
  * Registra una ruta con método CONNECT
+ * @param {string} path - Ruta a registrar
+ * @param {Function} controller - Controlador de la ruta
+ * @param {string} [name=''] - Nombre de la ruta (opcional)
+ * @returns {void}
  */
-export const connect = (path, controller, name = '') => addRoute('CONNECT', path, controller, name)
+export const connect = (path, controller, name = "") => addRoute("CONNECT", path, controller, name)
 
 /**
  * Registra una ruta con método TRACE
+ * @param {string} path - Ruta a registrar
+ * @param {Function} controller - Controlador de la ruta
+ * @param {string} [name=''] - Nombre de la ruta (opcional)
+ * @returns {void}
  */
-export const trace = (path, controller, name = '') => addRoute('TRACE', path, controller, name)
+export const trace = (path, controller, name = "") => addRoute("TRACE", path, controller, name)
 
 /**
  * Agrupa rutas con un prefijo y middlewares globales
@@ -75,12 +107,12 @@ export const trace = (path, controller, name = '') => addRoute('TRACE', path, co
  * @returns {void}
  */
 export function group(prefix, middlewares, callback) {
-  const prefixes = prefix.trim().split('/').filter(Boolean)
+  const prefixes = prefix.trim().split("/").filter(Boolean)
   globalprefixes.push(...prefixes)
   globalMiddlewares.push(...middlewares)
   callback()
-  prefixes.forEach(() => globalprefixes.pop())
-  middlewares.forEach(() => globalMiddlewares.pop())
+  globalprefixes.length -= prefixes.length
+  globalMiddlewares.length -= middlewares.length
 }
 
 /**
@@ -90,10 +122,10 @@ export function group(prefix, middlewares, callback) {
  * @returns {void}
  */
 export function prefix(prefix, callback) {
-  const prefixes = prefix.trim().split('/').filter(Boolean)
+  const prefixes = prefix.trim().split("/").filter(Boolean)
   globalprefixes.push(...prefixes)
   callback()
-  prefixes.forEach(() => globalprefixes.pop())
+  globalprefixes.length -= prefixes.length
 }
 
 /**
@@ -105,7 +137,7 @@ export function prefix(prefix, callback) {
 export function middleware(middlewares, callback) {
   globalMiddlewares.push(...middlewares)
   callback()
-  middlewares.forEach(() => globalMiddlewares.pop())
+  globalMiddlewares.length -= middlewares.length
 }
 
 /**
@@ -134,9 +166,9 @@ export function getRouteMap() {
  * @param {string} [name=''] - Nombre de la ruta (opcional)
  * @returns {void}
  */
-function addRoute(method, path, handler, name = '') {
-  const p = [...globalprefixes, ...path.trim().split('/').filter(Boolean)]
-  const key = '/' + p.join('/')
+function addRoute(method, path, handler, name = "") {
+  const p = [...globalprefixes, ...path.trim().split("/").filter(Boolean)]
+  const key = `/${p.join("/")}`
   setName(method, key, name)
   if (!routeMap[key]) {
     routeMap[key] = {}
@@ -152,9 +184,9 @@ function addRoute(method, path, handler, name = '') {
  * @returns {void}
  */
 function setName(method, path, name) {
-  if (name !== '') {
-    const n = [...globalprefixes, ...name.trim().split('.').filter(Boolean)]
-    const key = n.join('.')
+  if (name !== "") {
+    const n = [...globalprefixes, ...name.trim().split(".").filter(Boolean)]
+    const key = n.join(".")
     routeNameMap[key] = { method, path }
   }
 }
@@ -167,8 +199,8 @@ function setName(method, path, name) {
  */
 export function route(name) {
   const r = routeNameMap[name]
-  if (!r || r.method !== 'GET') {
-    throw HttpError.internal('La ruta GET: "' + name + '" no existe')
+  if (!r || r.method !== "GET") {
+    throw HttpError.internal(`La ruta GET: ${name} no existe`)
   }
   return r.path
 }
@@ -181,5 +213,3 @@ export function route(name) {
 export function routeInfo(name) {
   return routeNameMap[name]
 }
-
-
